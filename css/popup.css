@@ -25,7 +25,6 @@
 #ext_state, #ext_options {
     text-align: center;
     vertical-align: middle;
-    background-color: #4d4d4d;
     padding: 5px 10px 5px 10px;
     margin-left: 5px;
     width: 80px;
@@ -50,6 +49,16 @@ body {
 .buttonize {
     cursor: pointer;
 }
+.button_off {
+    background-color: #ff2f2f;
+}
+.button_on {
+    background-color: #0ff921;
+    color: #000000;
+}
+.button_neutral {
+    background-color: #4d4d4d;
+}
 
 /**
  * state css
@@ -64,10 +73,6 @@ body {
 .state_error {
 }
 .state_common {
-    /*
-    background-image: -webkit-linear-gradient(top, #404040 0%, #000000 100%);
-    border: 1px black solid;
-    */
     background-color: #4d4d4d;
     padding: 7px;
     color: #fff;
@@ -81,12 +86,14 @@ body {
 
 .state_warning:hover {
     background-color: #fb9c33;
+    color: #000000;
 }
 .state_error:hover {
     background-color: #ff2f2f;
 }
 .state_enforced:hover {
-    background-color: #34fa43;
+    background-color: #0ff921;
+    color: #000000;
 }
 
  .domain:hover {
