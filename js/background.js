@@ -27,7 +27,7 @@ var $config = {
             "xmlhttprequest",
             "stylesheet",
             "image", // may break certain sites: images.google.com or facebook
-            //"other",
+            "other",
         ]
     },
     icons: { // icons borrowed from http://dakirby309.deviantart.com/gallery/#/d4n4w3q with promise of safe return
