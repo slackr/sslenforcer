@@ -4,6 +4,7 @@
     "name": "SKN SSL Enforcer",
     "version": "0.0.1",
     "description": "Force Secure Browsing",
+    "homepage_url": "https://github.com/slackr/sslenforcer",
 
     "permissions": [
         "http://*/*", /* trigger onBeforeRequest and enforce SSL */
@@ -14,6 +15,12 @@
         "webRequestBlocking" /* control web requests before they happen */
      ],
 
+    "icons": {
+        "16": "img/ssle16.png",
+        "48": "img/ssle48.png",
+        "128": "img/ssle128.png"
+    },
+     
     "browser_action": {
         "default_icon": {
             "19": "img/disabled.png"
@@ -27,13 +34,6 @@
         //"persistent": false, // can't use with webRequest :(
         "scripts": ["js/common.js", "js/background.js"]
     },
-
+    
     "content_security_policy": "script-src 'self'; object-src 'self'"
-
-    /*"content_scripts": [{
-        "matches": [ "<all_urls>" ],
-        "js": [ "js/scriptfilter.js" ],
-        "run_at": "document_start",
-        "all_frames": true
-    }]*/
 }
