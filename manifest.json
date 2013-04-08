@@ -1,0 +1,39 @@
+{
+    "manifest_version": 2,
+
+    "name": "SKN SSL Enforcer",
+    "version": "0.0.1",
+    "description": "Force Secure Browsing",
+
+    "permissions": [
+        "http://*/*", /* trigger onBeforeRequest and enforce SSL */
+        "https://*/*", /* trigger onCompleted to confirm SSL enforcement */
+        "tabs", /* to handle per tab enforcement */
+        "storage", /* access chrome.storage.sync/local */
+        "webRequest", /* access to chrome.webRequest.* */
+        "webRequestBlocking" /* control web requests before they happen */
+     ],
+
+    "browser_action": {
+        "default_icon": {
+            "19": "img/disabled.png"
+        },
+        "default_popup": "html/popup.html"
+    },
+
+   "options_page": "html/options.html",
+
+    "background": {
+        //"persistent": false, // can't use with webRequest :(
+        "scripts": ["js/common.js", "js/background.js"]
+    },
+
+    "content_security_policy": "script-src 'self'; object-src 'self'"
+
+    /*"content_scripts": [{
+        "matches": [ "<all_urls>" ],
+        "js": [ "js/scriptfilter.js" ],
+        "run_at": "document_start",
+        "all_frames": true
+    }]*/
+}
