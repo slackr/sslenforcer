@@ -21,11 +21,13 @@ function initialize_popup() {
     $('#ext_version').text(ext_version);
     $('#ext_state')
         .addClass("buttonize")
+        .addClass($options.ssle_enabled ? "button_on" : "button_off")
         .text($options.ssle_enabled ? "Enabled" : "Disabled")
         .on("click", toggle_ssle);
 
     $('#ext_options')
         .addClass("buttonize")
+        .addClass("button_neutral")
         .text("Options")
         .on("click", function() {
             chrome.tabs.create({'url': chrome.extension.getURL('html/options.html')});
@@ -49,7 +51,10 @@ function initialize_popup() {
 
 function toggle_ssle() {
     $options.ssle_enabled = ($options.ssle_enabled ? 0 : 1);
-    $('#ext_state').text($options.ssle_enabled ? "Enabled" : "Disabled");
+    $('#ext_state')
+        .addClass($options.ssle_enabled ? "button_on" : "button_off")
+        .removeClass(!$options.ssle_enabled ? "button_on" : "button_off")
+        .text($options.ssle_enabled ? "Enabled" : "Disabled");
     
     chrome.extension.sendRequest({type: 'set_option', key: 'ssle_enabled', value: $options.ssle_enabled}, message_received);
     chrome.extension.sendRequest({type: 'save_options'}, message_received);
