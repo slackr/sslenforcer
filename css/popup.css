@@ -26,17 +26,6 @@
 }
 .state_error {
 }
-.state_common {
-    background-color: #4d4d4d;
-    padding: 7px;
-    color: #fff;
-    fint-weight: bold;
-    margin: 10px 0px 3px 0px;
-    vertical-align: middle;
-}
-.state_common:hover {
-    background-color: #737373;
-}
 
 .state_warning:hover {
     background-color: #fb9c33;

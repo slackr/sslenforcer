@@ -44,6 +44,17 @@ body {
     background-color: #4d4d4d;
 }
 
+.folder {
+    background-color: #4d4d4d;
+    padding: 7px;
+    color: #ffffff;
+    margin: 10px 0px 3px 0px;
+    vertical-align: middle;
+}
+.folder:hover {
+    background-color: #737373;
+}
+
 /**
  * for folder toggle
  */
