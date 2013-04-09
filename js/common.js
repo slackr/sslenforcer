@@ -1,10 +1,4 @@
 /**
- * this .js requires $config and $options from background.js
- *
- * use messages 'gimmie_options' and 'gimmie_config' to retrieve values
- */ 
-
-/**
  * utils
  */
 function log(msg, level, zone) {
