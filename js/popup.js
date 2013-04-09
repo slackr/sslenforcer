@@ -18,7 +18,10 @@ function initialize_page() {
     var ext_version = chrome.app.getDetails().version;
     
     $('#ext_name').text(ext_name);
-    $('#ext_version').text(ext_version);
+    $('#ext_version')
+        .addClass('emphasis')
+        .text(ext_version);
+        
     $('#ext_state')
         .addClass("buttonize")
         .addClass($options.ssle_enabled ? "button_on" : "button_off")
