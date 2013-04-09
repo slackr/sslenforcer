@@ -44,6 +44,17 @@ body {
     background-color: #4d4d4d;
 }
 
+.button_neutral:hover {
+    background-color: #4a9cff;
+}
+
+.padded {
+    text-align: center;
+    vertical-align: middle;
+    padding: 5px 10px 5px 10px;
+    margin: 0px 5px 0px 5px;
+}
+
 .folder {
     background-color: #4d4d4d;
     padding: 7px;
