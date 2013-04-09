@@ -53,6 +53,21 @@ function prioritize_states() {
     return priority;
 }
 
+
+
+function toggle_ssle() {
+    $options.ssle_enabled = ($options.ssle_enabled ? 0 : 1);
+    $('#ext_state')
+        .addClass($options.ssle_enabled ? "button_on" : "button_off")
+        .removeClass(!$options.ssle_enabled ? "button_on" : "button_off")
+        .text($options.ssle_enabled ? "Enabled" : "Disabled");
+    
+    chrome.extension.sendRequest({type: 'set_option', key: 'ssle_enabled', value: $options.ssle_enabled}, message_received);
+    chrome.extension.sendRequest({type: 'save_options'}, message_received);
+    
+    update_badge_text();
+}
+
 function message_received(ret) {
     log("received response from background.js: '" + ret.message + "'", 0, "msg");
 }
