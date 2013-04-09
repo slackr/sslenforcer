@@ -40,14 +40,14 @@
 
 .state_warning:hover {
     background-color: #fb9c33;
-    color: #000000;
+    color: #2c2c2c;
 }
 .state_error:hover {
     background-color: #ff2f2f;
 }
 .state_enforced:hover {
     background-color: #0ff921;
-    color: #000000;
+    color: #2c2c2c;
 }
 
  .domain:hover {
