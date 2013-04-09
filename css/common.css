@@ -38,6 +38,7 @@ body {
 
 .buttonize {
     cursor: pointer;
+    -webkit-user-select: none;
 }
 .button_off {
     background-color: #ff2f2f;
