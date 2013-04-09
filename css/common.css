@@ -1,0 +1,57 @@
+#container {
+    position: relative;
+    width: 700px;
+}
+#left {
+    position: absolute;
+    left: 0;
+}
+#right {
+    position: absolute;
+    right: 0;
+}
+#center {
+    position: relative;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    margin-left: 0px;
+    margin-right: 0px;
+}
+#header {
+    padding-bottom: 20px;
+}
+
+body {
+    font-family: Verdana, Tahoma, Arial;
+    font-size: small;
+    padding: 3px;
+    background-color: #2c2c2c;
+    color: #fff;
+}
+
+.buttonize {
+    cursor: pointer;
+}
+.button_off {
+    background-color: #ff2f2f;
+}
+.button_on {
+    background-color: #0ff921;
+    color: #000000;
+}
+.button_neutral {
+    background-color: #4d4d4d;
+}
+
+/**
+ * for folder toggle
+ */
+.hidden {
+    display: none;
+    margin-bottom: 3px;
+}
+.visible {
+    display: block;
+    margin-bottom: 3px;
+}
