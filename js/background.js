@@ -11,6 +11,7 @@ var $options = {
         hits: 3,
         ms: 2000,
     },
+    max_tab_status: 500,
 }
 
 /**
@@ -53,7 +54,6 @@ var $config = {
         "3": "Full URL matched for enforcement",
         "4": "URL is already HTTPS",
     },
-    max_tab_status: 500,
 }
 
 // http redirect loop protection
@@ -473,8 +473,8 @@ function push_tab_status(state, tid, reason, data) {
         $tab_status[tid][state][reason] = [];
     }
     
-    if (tab_reason_url_count(tid, state, reason) > $config.max_tab_status) {
-        status_msg = "tab status count exceeded " + $config.max_tab_status + ", ssle will cease reporting on new urls but will continue to enforce";   
+    if (tab_reason_url_count(tid, state, reason) > $options.max_tab_status) {
+        status_msg = "tab status count exceeded " + $options.max_tab_status + ", ssle will cease reporting on new urls but will continue to enforce";   
         log(status_msg, 3, "ssle");
     } else {
         $tab_status[tid][state][reason].push(data);
