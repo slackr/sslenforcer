@@ -60,7 +60,7 @@ function write_tab_status(ts) {
     var data = ts.data;
     var priority_states = prioritize_states(); // array of states, prioritized by weight
 
-    log("gimmie_status: " + JSON.stringify(data), -3, "debug");
+    log("gimmie_status: " + JSON.stringify(data), -2, "debug");
 
     for (var s = 0; s < priority_states.length; s++) {
         var state = priority_states[s];

@@ -475,7 +475,7 @@ function push_tab_status(state, tid, reason, data) {
     
     if (tab_reason_url_count(tid, state, reason) > $options.max_tab_status) {
         status_msg = "tab status count exceeded " + $options.max_tab_status + ", ssle will cease reporting on new urls but will continue to enforce";   
-        log(status_msg, 3, "ssle");
+        log(status_msg, 2, "ssle");
     } else {
         $tab_status[tid][state][reason].push(data);
     }
@@ -544,7 +544,7 @@ function init_tab(tid) {
 function get_options(callback) {
     $storage.get("options", function(items) {
         if (chrome.runtime.lastError != undefined)
-            log("error on storage.get: " + JSON.stringify(chrome.runtime.lastError), 3, "storage");
+            log("error on storage.get: " + JSON.stringify(chrome.runtime.lastError), 2, "storage");
 
         if (items.options == undefined) {
             log("no options in storage, using hard defaults", 0, "storage");
