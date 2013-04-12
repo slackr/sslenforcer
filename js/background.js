@@ -534,6 +534,7 @@ function init_tab(tid) {
     }
     
     update_badge_text();
+    set_icon("disabled", tid);
     
     log("tab_status for "+ tid +" initialized", -1, "tabs");
 }

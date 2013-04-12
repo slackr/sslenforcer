@@ -13,11 +13,17 @@ function log(msg, level, zone) {
 }
 
 function set_icon(icon, tid) {
-    chrome.browserAction.setIcon({
-        path: $config.icons[icon],
-        tabId: tid
-    });
-    log("icon set to '" + icon + "' on tab: " + tid);
+    if (tid != -1) {
+        chrome.browserAction.setIcon({
+            path: $config.icons[icon],
+            tabId: tid
+        });
+        
+        log("icon set to '" + icon + "' on tab: " + tid);
+    } else {
+        log("icon not set for tab: " + tid);
+    }
+    
 }
 
 function update_badge_text() {
