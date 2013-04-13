@@ -551,7 +551,9 @@ function get_options(callback) {
             log("no options in storage, using hard defaults", 0, "storage");
         }
         else {
-            $options = items.options;
+            for (var o in items.options) {
+                $options[o] = items.options[o];
+            }
             update_badge_text();
             
             log("options retrieved from storage (" + STORAGE_TYPE + ")", 0, "storage");
