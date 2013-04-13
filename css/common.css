@@ -61,6 +61,9 @@ body {
     padding: 5px 10px 5px 10px;
     margin: 0px 0px 0px 5px;
 }
+.margined {
+    margin: 7px 12px 7px 12px;
+}
 
 .folder {
     background-color: #4d4d4d;
