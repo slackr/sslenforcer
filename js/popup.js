@@ -91,8 +91,7 @@ function draw_state(state, state_data) {
                     .on("click", function() {
                         $(this).next('div').toggle('fast');
                     })
-            )
-            .append(
+                ,
                 $('<div>')
                     .attr('id','folder_state_' + state)
 
@@ -152,8 +151,7 @@ function draw_state(state, state_data) {
                         $('<span>')
                             .addClass('fqdn')
                             .text(fqdn)
-                    )
-                    .append(
+                        ,
                         $('<span>')
                             .attr('title',fulluri)
                             .addClass('uri')
