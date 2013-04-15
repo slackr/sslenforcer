@@ -252,7 +252,7 @@ function se(data) {
     var enforcement = 0;
     var status_msg = "";
 
-    log("get " + type + " (by tab: " + tid + ") - fqdn: " + fqdn + ", uri: " + uri, -1, "nav");
+    log("get " + type + " (by tab: " + tid + ") - fqdn: " + fqdn + ", uri: " + uri, -2, "nav");
 
     // check if our tab has initialized properly
     if ($tab_status[tid] == undefined) {
@@ -261,7 +261,7 @@ function se(data) {
 
     // if the tab navigates to a new main url, clear the tab status
     if (type == "main_frame" && tab_has_status(tid)) {
-        log("nav to new main_frame, tab_status for tab " + tid + " reset", -1, "nav");
+        log("nav to new main_frame, tab_status for tab " + tid + " reset", -2, "nav");
         uninit_tab(tid);
         init_tab(tid);
     }
