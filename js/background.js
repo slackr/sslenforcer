@@ -18,6 +18,7 @@ var $options = {
  * engine config
  */
 var $config = {
+    save_options_delay: 3000,
     filters: {
         urls: ["http://*/*", "https://*/*"],
         types: [
@@ -88,6 +89,10 @@ var $ssle = {
 var $tab_status = {
     // tid: {enforce: [], warning: [], disabled: [], error: []}, tid2: [ .. ]
 };
+
+var $timeouts = {
+    save_options: null
+}
 
 /**
  * webRequest listeners
@@ -210,17 +215,18 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
             break;
         
         case 'save_options':
-            save_options();
-            sendResponse({
-               message: "options saved"
-            })
+            save_options(function() {
+                sendResponse({
+                   message: "options saved"
+                })
+            });
             break;
         
         case 'set_option':
             $options[req.key] = req.value;
                         
             sendResponse({
-               message: "option '" + req.key + " = " + req.value + "' set"
+               message: "option '" + req.key + " = " + (typeof(req.value) == "object" ? JSON.stringify(req.value) : req.value)  + "' set"
             })
             break;
         
@@ -565,10 +571,14 @@ function get_options(callback) {
 }
 
 function save_options(callback) {
-    $storage.set({options: $options}, function() {
-        log("options saved to storage (" + STORAGE_TYPE + ")", 0, "storage");
-
-        if (callback != undefined)
-            callback();
-    });
+    clearTimeout($timeouts.save_options);
+    $timeouts.save_options = setTimeout(function() {
+        $storage.set({options: $options}, function() {
+            log("options saved to storage (" + STORAGE_TYPE + ")", 0, "storage");
+    
+            if (callback != undefined)
+                callback();
+        }); 
+    }, $config.save_options_delay); 
+    log("options save action delayed by " + $config.save_options_delay + "ms to avoid flooding storage", -2, "debug");
 }
