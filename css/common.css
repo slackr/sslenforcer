@@ -87,3 +87,19 @@ body {
     display: block;
     margin-bottom: 3px;
 }
+
+/**
+ * for layouts
+ */
+div.table {
+  overflow: hidden;
+}
+div.table label {
+  display: block;
+  float: left;
+  text-align: left;
+}
+div.table .float_right {
+  margin-left:4px;
+  float: right;
+}
