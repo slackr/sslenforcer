@@ -62,27 +62,27 @@ var $flood = {};
 
 var $ssle = {
     enforcement: {
-        "google.ca": { subdomains: 1, uri: "", id: "1" },
-        "google.com": { subdomains: 1, uri: "", id: "2" },
-        "wikipedia.org": { subdomains: 1, uri: "", id: "3" },
-        "chrome.com": { subdomains: 1, uri: "", id: "4" },
-        "www.rogers.com": { subdomains: 0, uri: "/web/Rogers.portal", id: "5" },
-        "linkedin.com": { subdomains: 1, uri: "", id: "6" },
-        "facebook.com": { subdomains: 1, uri: "", id: "7" },
-        "twitter.com": { subdomains: 1, uri: "", id: "8" },
-        "youtube.com": { subdomains: 1, uri: "", id: "9" },
-        "ytimg.com": { subdomains: 1, uri: "", id: "10" },
-        "fbcdn.net": { subdomains: 1, uri: "", id: "11" },
-        "webcache.googleusercontent.com": { subdomains: 0, uri: "", id: "12" },
+        "google.ca": { subdomains: 1, uri: ""},
+        "google.com": { subdomains: 1, uri: "" },
+        "wikipedia.org": { subdomains: 1, uri: "" },
+        "chrome.com": { subdomains: 1, uri: "" },
+        "www.rogers.com": { subdomains: 0, uri: "/web/Rogers.portal" },
+        "linkedin.com": { subdomains: 1, uri: "" },
+        "facebook.com": { subdomains: 1, uri: "" },
+        "twitter.com": { subdomains: 1, uri: "" },
+        "youtube.com": { subdomains: 1, uri: "" },
+        "ytimg.com": { subdomains: 1, uri: "" },
+        "fbcdn.net": { subdomains: 1, uri: "" },
+        "webcache.googleusercontent.com": { subdomains: 0, uri: "" },
     },
     dont_enforce: {
-        "youtube.com": { subdomains: 1, uri: "", id: "1" },
-        "ytimg.com": { subdomains: 1, uri: "", id: "2" },
+        "youtube.com": { subdomains: 1, uri: "" },
+        "ytimg.com": { subdomains: 1, uri: "" },
         
         // /blank.html causes issues with http://www.google.ca/imgres urls
         // URL floods out and tries to load https iframe, Chrome blocks it
-        "www.google.ca": { subdomains: 0, uri: /^\/blank.html$/i, id: "3" }, // to fix images.google.com ssl enforcement
-        "www.google.com": { subdomains: 0, uri: /^\/blank.html$/i, id: "4" }, // to fix images.google.com ssl enforcement
+        "www.google.ca": { subdomains: 0, uri: /^\/blank.html$/i }, // to fix images.google.com ssl enforcement
+        "www.google.com": { subdomains: 0, uri: /^\/blank.html$/i }, // to fix images.google.com ssl enforcement
     },
 };
 
