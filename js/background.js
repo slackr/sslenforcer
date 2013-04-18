@@ -12,6 +12,32 @@ var $options = {
         ms: 2000,
     },
     max_tab_status: 500,
+    
+    ssle : {
+        enforce: {
+            "google.ca": { subdomains: 1, uri: "", id: "iafcc8854" },
+            "google.com": { subdomains: 1, uri: "", id: "ie090849a" },
+            "wikipedia.org": { subdomains: 1, uri: "", id: "ia74d8e02" },
+            "chrome.com": { subdomains: 1, uri: "", id: "ie7b9ad91" },
+            "www.rogers.com": { subdomains: 0, uri: "/web/Rogers.portal", id: "ic1b9f0f8" },
+            "linkedin.com": { subdomains: 1, uri: "", id: "i5c9f10bf" },
+            "facebook.com": { subdomains: 1, uri: "", id: "iee48a9a4" },
+            "twitter.com": { subdomains: 1, uri: "", id: "i1a845a6a" },
+            "youtube.com": { subdomains: 1, uri: "", id: "i8795ab11" },
+            "ytimg.com": { subdomains: 1, uri: "", id: "i9f7e5dfe" },
+            "fbcdn.net": { subdomains: 1, uri: "", id: "ib4575dbb" },
+            "webcache.googleusercontent.com": { subdomains: 0, uri: "", id: "ib2890983" },
+        },
+        exclude: {
+            "youtube.com": { subdomains: 1, uri: "", id: "ib6594961" },
+            "ytimg.com": { subdomains: 1, uri: "", id: "i18d9fb3c" },
+            
+            // /blank.html causes issues with http://www.google.ca/imgres urls
+            // URL floods out and tries to load https iframe, Chrome blocks it
+            "www.google.ca": { subdomains: 0, uri: "/blank.html", id: "i0ad1fd08" }, // to fix images.google.com ssl enforcement
+            "www.google.com": { subdomains: 0, uri: "/blank.html", id: "i61384115" }, // to fix images.google.com ssl enforcement
+        },
+    },
 }
 
 /**
@@ -59,32 +85,6 @@ var $config = {
 
 // http redirect loop protection
 var $flood = {};
-
-var $ssle = {
-    enforcement: {
-        "google.ca": { subdomains: 1, uri: "", id: "iafcc8854" },
-        "google.com": { subdomains: 1, uri: "", id: "ie090849a" },
-        "wikipedia.org": { subdomains: 1, uri: "", id: "ia74d8e02" },
-        "chrome.com": { subdomains: 1, uri: "", id: "ie7b9ad91" },
-        "www.rogers.com": { subdomains: 0, uri: "/web/Rogers.portal", id: "ic1b9f0f8" },
-        "linkedin.com": { subdomains: 1, uri: "", id: "i5c9f10bf" },
-        "facebook.com": { subdomains: 1, uri: "", id: "iee48a9a4" },
-        "twitter.com": { subdomains: 1, uri: "", id: "i1a845a6a" },
-        "youtube.com": { subdomains: 1, uri: "", id: "i8795ab11" },
-        "ytimg.com": { subdomains: 1, uri: "", id: "i9f7e5dfe" },
-        "fbcdn.net": { subdomains: 1, uri: "", id: "ib4575dbb" },
-        "webcache.googleusercontent.com": { subdomains: 0, uri: "", id: "ib2890983" },
-    },
-    dont_enforce: {
-        "youtube.com": { subdomains: 1, uri: "", id: "ib6594961" },
-        "ytimg.com": { subdomains: 1, uri: "", id: "i18d9fb3c" },
-        
-        // /blank.html causes issues with http://www.google.ca/imgres urls
-        // URL floods out and tries to load https iframe, Chrome blocks it
-        "www.google.ca": { subdomains: 0, uri: "/blank.html", id: "i0ad1fd08" }, // to fix images.google.com ssl enforcement
-        "www.google.com": { subdomains: 0, uri: "/blank.html", id: "i61384115" }, // to fix images.google.com ssl enforcement
-    },
-};
 
 var $tab_status = {
     // tid: {enforce: [], warning: [], disabled: [], error: []}, tid2: [ .. ]
@@ -410,57 +410,57 @@ function flood_check(url, secure_url, tid) {
 function enforce_match(fqdn, uri) {
     var domain = fqdn.url_parse("domain"); // xyz.www.test.com -> test.com
 
-    if ($ssle.dont_enforce[domain] != undefined) {
-        if ($ssle.dont_enforce[domain].uri != "") { // uri must match to skip enforcement
-            if ($ssle.dont_enforce[domain].uri instanceof RegExp
-                && $ssle.dont_enforce[domain].uri.test(uri)) {
+    if ($options.ssle.exclude[domain] != undefined) {
+        if ($options.ssle.exclude[domain].uri != "") { // uri must match to skip enforcement
+            if ($options.ssle.exclude[domain].uri instanceof RegExp
+                && $options.ssle.exclude[domain].uri.test(uri)) {
                 return -4; // regex for uri matched
             }
-            if ($ssle.dont_enforce[domain].uri == uri) {
+            if ($options.ssle.exclude[domain].uri == uri) {
                 return -4; // exact uri match
             }
-        } else if ($ssle.dont_enforce[domain].uri == "") {
+        } else if ($options.ssle.exclude[domain].uri == "") {
             return -4;
         }
     }
-    if ($ssle.dont_enforce[fqdn] != undefined) {
-        if ($ssle.dont_enforce[fqdn].uri != "") { // uri must match to skip enforcement
-            if ($ssle.dont_enforce[fqdn].uri instanceof RegExp
-                && $ssle.dont_enforce[fqdn].uri.test(uri)) {
+    if ($options.ssle.exclude[fqdn] != undefined) {
+        if ($options.ssle.exclude[fqdn].uri != "") { // uri must match to skip enforcement
+            if ($options.ssle.exclude[fqdn].uri instanceof RegExp
+                && $options.ssle.exclude[fqdn].uri.test(uri)) {
                 return -4; // regex for uri matched
             }
-            if ($ssle.dont_enforce[fqdn].uri == uri) {
+            if ($options.ssle.exclude[fqdn].uri == uri) {
                 return -4; // exact uri match
             }
-        } else if ($ssle.dont_enforce[fqdn].uri == "") {
+        } else if ($options.ssle.exclude[fqdn].uri == "") {
             return -4;
         }
     }
     
-    if ($ssle.enforcement[domain] != undefined) {
-        if ($ssle.enforcement[domain].subdomains == 0
+    if ($options.ssle.enforce[domain] != undefined) {
+        if ($options.ssle.enforce[domain].subdomains == 0
             && domain != fqdn) {
             return -1;
         }
-        if ($ssle.enforcement[domain].uri != "") {
-            if ((typeof($ssle.enforcement[domain].uri) == "string"
-                && $ssle.enforcement[domain].uri == uri)
+        if ($options.ssle.enforce[domain].uri != "") {
+            if ((typeof($options.ssle.enforce[domain].uri) == "string"
+                && $options.ssle.enforce[domain].uri == uri)
                 ||
-                ($ssle.dont_enforce[domain].uri instanceof RegExp
-                && $ssle.dont_enforce[domain].uri.test(uri))) {
+                ($options.ssle.exclude[domain].uri instanceof RegExp
+                && $options.ssle.exclude[domain].uri.test(uri))) {
                 return 3;
             }
             return -3;
         }
         return 1;
     }
-    if ($ssle.enforcement[fqdn] != undefined) {
-        if ($ssle.enforcement[fqdn].uri != "") {
-            if (((typeof($ssle.enforcement[fqdn].uri) == "string"
-                && $ssle.enforcement[fqdn].uri == uri)
+    if ($options.ssle.enforce[fqdn] != undefined) {
+        if ($options.ssle.enforce[fqdn].uri != "") {
+            if (((typeof($options.ssle.enforce[fqdn].uri) == "string"
+                && $options.ssle.enforce[fqdn].uri == uri)
                 ||
-                $ssle.dont_enforce[fqdn].uri instanceof RegExp
-                && $ssle.dont_enforce[fqdn].uri.test(uri))) {
+                $options.ssle.exclude[fqdn].uri instanceof RegExp
+                && $options.ssle.exclude[fqdn].uri.test(uri))) {
                 return 3;
             }
             return -3;
