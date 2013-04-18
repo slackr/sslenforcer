@@ -19,9 +19,9 @@ function set_icon(icon, tid) {
             tabId: tid
         });
         
-        log("icon set to '" + icon + "' on tab: " + tid);
+        log("icon set to '" + icon + "' on tab: " + tid, -2, "debug");
     } else {
-        log("icon not set for tab: " + tid);
+        log("icon not set for tab: " + tid, -2, "debug");
     }
     
 }
