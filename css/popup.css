@@ -34,21 +34,3 @@
     background-color: #0ff921;
     color: #2c2c2c;
 }
-
- .domain:hover {
-    background-color: #4d4d4d;
- }
-
-.uri {
-    color: #888888;
-    padding: 7px 7px 7px 12px;
-    overflow: auto;
-}
-.fqdn {
-    color: #d6d6d6;
-    padding: 7px 7px 7px 25px;
-}
-.domain {
-    font-weight: bold;
-    padding: 7px 7px 7px 12px;
-}

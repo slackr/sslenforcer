@@ -1,8 +1,6 @@
 #container {
     position: relative;
     width: 700px;
-    margin-left: auto;
-    margin-right: auto;
 }
 #left {
     position: absolute;
@@ -17,8 +15,8 @@
     padding-left: 10px;
     padding-right: 10px;
 
-    margin-left: 0px;
-    margin-right: 0px;
+    margin-left: auto;
+    margin-right: auto;
 }
 #header {
     padding-bottom: 20px;
@@ -101,4 +99,22 @@ div.table label {
 }
 div.table .float_right {
   float: right;
+}
+
+
+.uri {
+    color: #888888;
+    padding: 7px 7px 7px 12px;
+    overflow: auto;
+}
+.fqdn {
+    color: #d6d6d6;
+    padding: 7px 7px 7px 25px;
+}
+.domain {
+    font-weight: bold;
+    padding: 7px 7px 7px 12px;
+}
+.domain:hover {
+    background-color: #4d4d4d;
 }
