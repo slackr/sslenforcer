@@ -41,13 +41,19 @@ body {
     -webkit-user-select: none;
 }
 .button_off {
+    text-align: center;
+    vertical-align: middle;
     background-color: #ff2f2f;
 }
 .button_on {
+    text-align: center;
+    vertical-align: middle;
     background-color: #0ff921;
     color: #2c2c2c;
 }
 .button_neutral {
+    text-align: center;
+    vertical-align: middle;
     background-color: #4d4d4d;
 }
 
@@ -56,10 +62,8 @@ body {
 }
 
 .padded {
-    text-align: center;
     vertical-align: middle;
-    padding: 5px 10px 5px 10px;
-    margin: 0px 0px 0px 5px;
+    padding: 7px 12px 7px 12px;
 }
 .margined {
     margin: 7px 12px 7px 12px;
@@ -67,7 +71,6 @@ body {
 
 .folder {
     background-color: #4d4d4d;
-    padding: 7px;
     color: #ffffff;
     margin: 10px 0px 10px 0px;
     vertical-align: middle;

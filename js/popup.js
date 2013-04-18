@@ -85,6 +85,7 @@ function draw_state(state, state_data) {
                     .attr('id','state_' + state)
                     .text($config.state_reason[reason])
 
+                    .addClass('padded')
                     .addClass('folder')
                     .addClass('state_' + state)
                     .addClass('buttonize')
