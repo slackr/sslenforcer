@@ -1,6 +1,9 @@
 #container {
     position: relative;
     width: 700px;
+
+    margin-left: auto;
+    margin-right: auto;
 }
 #left {
     position: absolute;
@@ -14,9 +17,6 @@
     position: relative;
     padding-left: 10px;
     padding-right: 10px;
-
-    margin-left: auto;
-    margin-right: auto;
 }
 #header {
     padding-bottom: 20px;
