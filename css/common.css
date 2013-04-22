@@ -44,17 +44,20 @@ body {
     text-align: center;
     vertical-align: middle;
     background-color: #ff2f2f;
+    margin: 0px 2px 0px 2px;
 }
 .button_on {
     text-align: center;
     vertical-align: middle;
     background-color: #0ff921;
     color: #2c2c2c;
+    margin: 0px 2px 0px 2px;
 }
 .button_neutral {
     text-align: center;
     vertical-align: middle;
     background-color: #4d4d4d;
+    margin: 0px 2px 0px 2px;
 }
 
 .button_neutral:hover {
@@ -93,15 +96,15 @@ body {
  * for layouts
  */
 div.table {
-  overflow: hidden;
+    overflow: hidden;
 }
 div.table label {
-  display: block;
-  float: left;
-  text-align: left;
+    display: block;
+    float: left;
+    text-align: left;
 }
 div.table .float_right {
-  float: right;
+    float: right;
 }
 
 
