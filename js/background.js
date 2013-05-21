@@ -113,7 +113,8 @@ chrome.webRequest.onCompleted.addListener(
 
         log("onCompleted: " + JSON.stringify(data), -2, "debug");
 
-        if ($tab_status[tid] != undefined) {
+        if ($options.ssle_enabled == 1
+            && $tab_status[tid] != undefined) {
             for (var state in $tab_status[tid]) {
                 if (Object.keys($tab_status[tid][state]).length > 0
                     && $config.states[state].weight >= current_weight) {
@@ -123,17 +124,14 @@ chrome.webRequest.onCompleted.addListener(
             }
 
             if (Object.keys($tab_status[tid].enforced).length > 0
-                && Object.keys($tab_status[tid].disabled).length > 0) {
+                && Object.keys($tab_status[tid].disabled).length > 0
+                && Object.keys($tab_status[tid].error).length == 0) {
 
-                if (Object.keys($tab_status[tid].error).length == 0) {
-                    current_state = "warning"; 
-                }
-                
-                log("not all urls are being enforced", 1, "enforce");
+                current_state = "warning";
             }
-
-            set_icon(current_state, tid);
         }
+
+        set_icon(current_state, tid);
     },
     $config.filters
 );
@@ -188,6 +186,7 @@ chrome.runtime.onStartup.addListener(function() {
  */
 chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
     log("incoming message: " + JSON.stringify(req), -2, "msg");
+    
     switch (req.type) {
         case 'gimmie_status':
             sendResponse({
@@ -217,7 +216,8 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
         case 'save_options':
             save_options(function() {
                 sendResponse({
-                   message: "options saved"
+                   message: "options saved",
+                   options: $options
                 })
             });
             break;
@@ -227,6 +227,14 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
                         
             sendResponse({
                message: "option '" + req.key + " = " + (typeof(req.value) == "object" ? JSON.stringify(req.value) : req.value)  + "' set"
+            })
+            break;
+        
+        case 'delete_url':
+            delete $options.ssle[req.url_type][req.entry];
+            
+            sendResponse({
+               message: "ssle url '" + req.url_type + "." + req.entry + "' was removed"
             })
             break;
         
@@ -278,7 +286,7 @@ function se(data) {
             status_msg = "rule matched for '" + fqdn + "' but enforcement is explicitly disabled";
             push_tab_status("warning", tid, enforcement, {
                 url: fqdn + uri,
-                msg: status_msg
+                //msg: status_msg
             });
 
             log(status_msg, 1, "enforce");
@@ -288,7 +296,7 @@ function se(data) {
             status_msg = "fqdn '" + fqdn + "' matched but uri did not";
             push_tab_status("warning", tid, enforcement, {
                 url: fqdn + uri,
-                msg: status_msg
+                //msg: status_msg
             });
 
             log(status_msg, 1, "enforce");
@@ -298,7 +306,7 @@ function se(data) {
             status_msg = "domain for '" + fqdn + "' matched but subdomains are not enforced";
             push_tab_status("warning", tid, enforcement, {
                 url: fqdn + uri,
-                msg: status_msg
+                //msg: status_msg
             });
 
             log(status_msg, 1, "enforce");
@@ -309,7 +317,7 @@ function se(data) {
                 status_msg = "url '" + fqdn + uri + "' is already https";
                 push_tab_status("enforced", tid, 4, {
                     url: fqdn + uri,
-                    msg: status_msg
+                    //msg: status_msg
                 });
 
                 log(status_msg, 1, "enforce");
@@ -317,7 +325,7 @@ function se(data) {
                 status_msg = "not enforcing SSL for fqdn: " + fqdn;
                 push_tab_status("disabled", tid, enforcement, {
                     url: fqdn + uri,
-                    msg: status_msg
+                    //msg: status_msg
                 });
 
                 log(status_msg, 1, "enforce");
@@ -328,7 +336,7 @@ function se(data) {
             status_msg = "domain '*." + fqdn.url_parse("domain") + "' matched for enforcement: " + secure_url;
             push_tab_status("enforced", tid, enforcement, {
                 url: fqdn + uri,
-                msg: status_msg
+                //msg: status_msg
             });
 
             log(status_msg, 1, "enforce");
@@ -339,7 +347,7 @@ function se(data) {
             status_msg = "fqdn '" + fqdn + "' matched for enforcement: " + secure_url;
             push_tab_status("enforced", tid, enforcement, {
                 url: fqdn + uri,
-                msg: status_msg
+                //msg: status_msg
             });
 
             log(status_msg, 1, "enforce");
@@ -350,7 +358,7 @@ function se(data) {
             status_msg = "fqdn '" + fqdn + "' and uri '" + uri + "' matched for enforcement: " + secure_url;
             push_tab_status("enforced", tid, enforcement, {
                 url: fqdn + uri,
-                msg: status_msg
+                //msg: status_msg
             });
 
             log(status_msg, 1, "enforce");
@@ -389,7 +397,7 @@ function flood_check(url, secure_url, tid) {
 
         push_tab_status("error", tid, -2, {
             url: url,
-            msg: status_msg
+            //msg: status_msg
         });
 
         log(status_msg, 1, "flood");
