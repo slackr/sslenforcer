@@ -91,6 +91,9 @@ body {
 .visible {
     display: block;
 }
+.fixed {
+    position: fixed;
+}
 
 /**
  * for layouts
