@@ -80,6 +80,13 @@ function uniq_id() {
     return "i" + (S4() + S4());
 }
 
+function show_popup() {
+    $('#popup').fadeIn('fast');
+}
+function hide_popup() {
+    $('#popup').fadeOut('fast');
+}
+
 /**
  * prototypes
  */
