@@ -7,12 +7,12 @@
     "homepage_url": "https://github.com/slackr/sslenforcer",
 
     "permissions": [
-        "http://*/*", /* trigger onBeforeRequest and enforce SSL */
-        "https://*/*", /* trigger onCompleted to confirm SSL enforcement */
-        "tabs", /* to handle per tab enforcement */
-        "storage", /* access chrome.storage.sync/local */
-        "webRequest", /* access to chrome.webRequest.* */
-        "webRequestBlocking" /* control web requests before they happen */
+        "http://*/*",
+        "https://*/*",
+        "tabs",
+        "storage",
+        "webRequest",
+        "webRequestBlocking"
      ],
 
     "icons": {
@@ -31,7 +31,6 @@
    "options_page": "html/options.html",
 
     "background": {
-        //"persistent": false, // can't use with webRequest :(
         "scripts": ["js/common.js", "js/background.js"]
     },
     
