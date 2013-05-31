@@ -1,4 +1,27 @@
 /**
+ * rule db
+ */
+function select_record_by_id(id) {
+    for (var type in $options.ssle) {
+        for (var entry in $options.ssle[type]) {
+            if ($options.ssle[type][entry].id == id) {
+                return { type: type, entry: entry };
+            }
+        }
+    }
+    return undefined;
+}
+function delete_record_by_id(id) {
+    for (var type in $options.ssle) {
+        for (var entry in $options.ssle[type]) {
+            if ($options.ssle[type][entry].id == id) {
+                delete $options.ssle[type][entry];
+            }
+        }
+    }
+}
+
+/**
  * utils
  */
 function log(msg, level, zone) {
@@ -76,8 +99,12 @@ function uniq_id() {
     var S4 = function() {
         return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
     };
-
-    return "i" + (S4() + S4());
+    var id = "i" + (S4() + S4());
+    
+    if (typeof select_record_by_id(id) != "undefined") {
+        id = uniq_id();
+    }
+    return id;
 }
 
 function show_popup() {
