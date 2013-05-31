@@ -1,17 +1,26 @@
+/**
+ *    manifest permissions:
+ *      http - trigger onBeforeRequest and enforce SSL
+ *      https - trigger onCompleted to confirm SSL enforcement
+ *      tabs - to handle per tab enforcement
+ *      storage - access chrome.storage.sync/local
+ *      webRequest - access to chrome.webRequest.*
+ *      webRequestBlocking - control web requests before they happen
+ */
 const STORAGE_TYPE = 'sync'; // 'sync' or 'local'
 var $storage = (STORAGE_TYPE == 'sync' ? chrome.storage.sync : chrome.storage.local);
 
 /**
  * user config hard defaults
  */
-var $options = {
+var $options_defaults = {
     ssle_enabled: 1,
-    log_level: -2,
+    log_level: 2,
     flood: {
         hits: 3,
         ms: 2000,
     },
-    max_tab_status: 500,
+    max_tab_status: 100,
     
     ssle : {
         enforce: {
@@ -23,22 +32,22 @@ var $options = {
             "linkedin.com": { subdomains: 1, uri: "", id: "i5c9f10bf" },
             "facebook.com": { subdomains: 1, uri: "", id: "iee48a9a4" },
             "twitter.com": { subdomains: 1, uri: "", id: "i1a845a6a" },
-            "youtube.com": { subdomains: 1, uri: "", id: "i8795ab11" },
-            "ytimg.com": { subdomains: 1, uri: "", id: "i9f7e5dfe" },
             "fbcdn.net": { subdomains: 1, uri: "", id: "ib4575dbb" },
             "webcache.googleusercontent.com": { subdomains: 0, uri: "", id: "ib2890983" },
         },
-        exclude: {
-            "youtube.com": { subdomains: 1, uri: "", id: "ib6594961" },
-            "ytimg.com": { subdomains: 1, uri: "", id: "i18d9fb3c" },
-            
+        exclude: {            
             // /blank.html causes issues with http://www.google.ca/imgres urls
             // URL floods out and tries to load https iframe, Chrome blocks it
             "www.google.ca": { subdomains: 0, uri: "/blank.html", id: "i0ad1fd08" }, // to fix images.google.com ssl enforcement
             "www.google.com": { subdomains: 0, uri: "/blank.html", id: "i61384115" }, // to fix images.google.com ssl enforcement
         },
     },
-}
+};
+
+/**
+ * clone object, doesn't support object values.. (regex)
+ */
+var $options = JSON.parse(JSON.stringify($options_defaults));
 
 /**
  * engine config
@@ -213,6 +222,14 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
             });
             break;
         
+        case 'restore_default_options':
+            $storage.clear();
+            get_options();
+            sendResponse({
+               message: "storage was cleared and default options were restored"
+            });
+            break;
+        
         case 'save_options':
             save_options(function() {
                 sendResponse({
@@ -227,15 +244,28 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
                         
             sendResponse({
                message: "option '" + req.key + " = " + (typeof(req.value) == "object" ? JSON.stringify(req.value) : req.value)  + "' set"
-            })
+            });
             break;
         
-        case 'delete_url':
-            delete $options.ssle[req.url_type][req.entry];
+        case 'set_rule':
+            if (req.value.id == "") {
+                req.value.id = uniq_id();
+            } else { //cleanup existing rule before an edit
+                delete_record_by_id(req.value.id);
+            }
+            $options.ssle[req.rule_type][req.rule_fqdn] = req.value;
             
             sendResponse({
-               message: "ssle url '" + req.url_type + "." + req.entry + "' was removed"
-            })
+               message: "rule '" + req.rule_fqdn + " = " + JSON.stringify(req.value) + "' set in '" + req.rule_type + "' ruleset"
+            });
+            break;
+        
+        case 'delete_rule':
+            delete_record_by_id(req.id);
+            
+            sendResponse({
+               message: "ssle record '" + req.rule_entry + " (" + req.rule_type + ":" + req.id + ")' was removed"
+            });
             break;
         
         default:
@@ -563,8 +593,9 @@ function get_options(callback) {
 
         if (items.options == undefined) {
             log("no options in storage, using hard defaults", 0, "storage");
-        }
-        else {
+            $options = JSON.parse(JSON.stringify($options_defaults));
+            
+        } else {
             for (var o in items.options) {
                 $options[o] = items.options[o];
             }
