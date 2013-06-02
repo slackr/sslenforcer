@@ -18,23 +18,15 @@ function initialize_page() {
     var ext_version = chrome.app.getDetails().version;
     
     $('#ext_name').text(ext_name);
-    $('#ext_version')
-        .addClass('emphasis')
-        .text(ext_version);
+    $('#ext_version').text(ext_version);
         
     $('#ext_state')
-        .addClass("buttonize")
         .addClass($options.ssle_enabled ? "button_on" : "button_off")
-        .addClass("padded")
         
         .text($options.ssle_enabled ? "Enabled" : "Disabled")
         .on("click", toggle_ssle);
 
-    $('#ext_options')
-        .addClass("buttonize")
-        .addClass("button_neutral")
-        .addClass("padded")
-        
+    $('#ext_options')        
         .text("Options")
         .on("click", function() {
             chrome.tabs.create({'url': chrome.extension.getURL('html/options.html')});
