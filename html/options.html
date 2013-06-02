@@ -2,18 +2,87 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html, charset=UTF-8" />
-    <title>Options</title>
-    <link rel="stylesheet" href="../css/popup.css" type="text/css" media="screen" />
+    <title></title>
+    <link rel="stylesheet" href="../css/common.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="../css/options.css" type="text/css" media="screen" />
     <script type="text/javascript" src="../js/common.js"></script>
     <script type="text/javascript" src="../js/jquery.js"></script>
     <script type="text/javascript" src="../js/options.js"></script>
 </head>
 <body>
+<div id="popup" class="hidden">
+    <div id="popup_message" class="padded">
+        <div class="padded margined" id="rule_title"></div>
+        <div class="padded margined warning">
+            If the URI field is left blank all URIs will be included in the rule (/*). To include only the root URI, use / <br />
+        </div>
+        <div class="table padded info" id="rule_area">
+            <span class="padded">
+                <input type="hidden" value="" id="rule_id" />
+                <input type="hidden" value="" id="rule_type" />
+                <span id="rule_subdomains" class="hidden"></span>
+                <input type="text" class="ui_textbox padded" value="" id="rule_fqdn" />
+                <input type="text" class="ui_textbox padded" value="" id="rule_uri" /> 
+            </span>
+            <span class="padded float_right">
+                <span id="rule_save" class="buttonize button_neutral padded"></span>
+                <span id="rule_cancel" class="buttonize button_neutral padded"></span>
+            </span>
+        </div>  
+    </div>
+</div>
 <div id="container">
     <div id="left"></div>
-    <div id="right"></div>
+    <div id="right">
+        <span id="info" class="padded message hidden fixed"></span>
+    </div>
     <div id="center">
-        <div id="main"></div>
+        <div id="header" class="table">
+            <label><span id="ext_name"></span> <span id="ext_version" class="emphasis"></span></label>
+            <span class="float_right">
+                <span id="ext_restore_defaults" class="buttonize button_neutral padded"></span>
+                <span id="ext_save_options" class="buttonize button_neutral padded"></span>
+            </span>
+        </div>
+        
+        <div class="padded warning">
+            <strong>Warning:</strong> Options are not encrypted in storage. Do not add URLs with sensitive information (usernames, passwords, session IDs).
+        </div>
+        
+        <div id="main">                
+            <div id="enforce" class="buttonize padded folder enforce table">URLs to enforce</div>
+            <div id="folder_enforce" class="table visible">
+                <div class="padded margined"><span id="rule_add_enforce" class="buttonize button_neutral padded float_right">Add Rule</span></div>
+            </div>
+            <div id="exclude" class="buttonize padded folder exclude table">Exclusions</div>
+            <div id="folder_exclude" class="table hidden">        
+                <div class="padded margined"><span id="rule_add_exclude" class="buttonize button_neutral padded float_right">Add Rule</span></div>
+            </div>
+            
+            <div id="advanced_options" class="buttonize padded folder">Advanced Options</div>
+            <div id="folder_advanced_options" class="hidden">
+                <div class="table margined">
+                    <label>Maximum URLs to track in Popup</label>
+                    <span class="float_right">
+                        <span id="option_value_max_tab_status" class="emphasis ui_value"></span>
+                    </span>
+                </div>
+                <div class="table margined">
+                    <label>Console logging level</label>
+                    <span class="float_right">
+                        <span id="option_value_log_level" class="emphasis ui_value"></span>
+                    </span>
+                </div>
+                <div class="table margined">
+                    <label>Enforcement flood protection</label>
+                    <span class="float_right">
+                        <span id="option_value_flood_hits" class="emphasis ui_value"></span> requests
+                        in
+                        <span id="option_value_flood_ms" class="emphasis ui_value"></span> miliseconds
+                    </span>
+                </div>
+            </div>                
+        </div>
     </div>
 </div>
 </body>

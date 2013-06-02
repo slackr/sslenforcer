@@ -1,0 +1,77 @@
+#popup {
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    z-index: 1001;
+    background-color: rgba(0,0,0,0.8);
+}
+#popup_message {
+    position: absolute;
+    top: 40%;
+    left: 25%;
+    width: 800px;
+    z-index: 1002;
+    overflow: auto;
+    background-color: rgba(0,0,0,1);
+}
+
+.option_key {
+}
+
+.ui_textbox {
+    border: 0px;
+    font-weight: bold;
+    background-color: #4d4d4d;
+    color: #ffffff;
+    vertical-align: middle;
+}
+
+.ui_value {
+    color: #4a9cff;
+}
+.ui_value_error {
+    color: #ffffff;
+    background-color: #ff2f2f;
+}
+.ui_box {
+    width: 12px;
+    display: inline-block;
+}
+
+.warning {
+    color: #ff2f2f;
+    background-color: #141414;
+    text-align: left;
+}
+.message {
+    color: #ffffff;
+    background-color: #4a9cff;
+}
+.info {
+    color: #ffffff;
+    background-color: #000000;
+}
+
+.enforce {
+}
+.exclude {
+}
+
+.exclude:hover, .exclusion_banner {
+    background-color: #ff2f2f;
+}
+.enforce:hover, .enforcement_banner {
+    background-color: #0ff921;
+    color: #2c2c2c;
+}
+.domain:hover {
+    background-color: none;
+}
+
+.highlight:hover {
+    background-color: #141414;
+}
+
