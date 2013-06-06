@@ -16,6 +16,7 @@ var $storage = (STORAGE_TYPE == 'sync' ? chrome.storage.sync : chrome.storage.lo
 var $options_defaults = {
     ssle_enabled: 1,
     log_level: 2,
+    verbose_tab: 0,
     flood: {
         hits: 3,
         ms: 2000,
@@ -345,10 +346,12 @@ function se(data) {
         case 0:
             if (url.is_https()) {
                 status_msg = "url '" + fqdn + uri + "' is already https";
-                push_tab_status("enforced", tid, 4, {
-                    url: fqdn + uri,
-                    //msg: status_msg
-                });
+                
+                if ($options.verbose_tab) 
+                    push_tab_status("enforced", tid, 4, {
+                        url: fqdn + uri,
+                        //msg: status_msg
+                    });
 
                 log(status_msg, 1, "enforce");
             } else {
@@ -518,8 +521,8 @@ function push_tab_status(state, tid, reason, data) {
     }
     
     if (tab_reason_url_count(tid, state, reason) > $options.max_tab_status) {
-        status_msg = "tab status count exceeded " + $options.max_tab_status + ", ssle will cease reporting on new urls but will continue to enforce";   
-        log(status_msg, 2, "ssle");
+        status_msg = "tab status count exceeded " + $options.max_tab_status + " for '" + tid + "', ssle will cease reporting on new urls but will continue to enforce";   
+        log(status_msg, 1, "ssle");
     } else {
         $tab_status[tid][state][reason].push(data);
     }

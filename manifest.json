@@ -2,8 +2,8 @@
     "manifest_version": 2,
 
     "name": "SKN SSL Enforcer",
-    "version": "0.0.1",
-    "description": "Force Secure Browsing",
+    "version": "0.0.2",
+    "description": "Force secure browsing with HTTPS",
     "homepage_url": "https://github.com/slackr/sslenforcer",
 
     "permissions": [
