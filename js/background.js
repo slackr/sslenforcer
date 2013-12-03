@@ -64,7 +64,7 @@ var $config = {
             "object",
             "xmlhttprequest",
             "stylesheet",
-            "image", // may break certain sites: images.google.com or facebook
+            "image",
             "other",
         ]
     },
@@ -89,7 +89,7 @@ var $config = {
         "1": "Domain matched for enforcement",
         "2": "FQDN matched for enforcement",
         "3": "Full URL matched for enforcement",
-        "4": "URL is already HTTPS",
+        "4": "URL was accessed via HTTPS",
     },
 }
 
