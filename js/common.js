@@ -56,27 +56,17 @@ function update_badge_text() {
 }
 
 /**
- * return reverse sorted array of states based on $config.states[...].weight
- *
- * sorry, I can't think of a better way to do this right now..
+ * return array of states sorted by descending weight
  */
 function prioritize_states() {
-    var priority = [], weights = [];
-
-    for (var state in $config.states) {
-        weights.push($config.states[state].weight);
+    var stateSortArr = [];
+    for (stateName in $config.states) {
+        stateSortArr.push({ name: stateName, weight: $config.states[stateName].weight });
     }
-    weights = weights.reverse();
 
-    for (var i = 0; i < weights.length; i++) {
-        for (var state in $config.states)
-            if ($config.states[state].weight == weights[i])
-                priority.push(state);
-    }
-    return priority;
+    stateSortArr.sort(function(a, b) { return b.weight - a.weight }); //b - a for descending sort
+    return stateSortArr.map(function(state) { return state.name });
 }
-
-
 
 function toggle_ssle() {
     $options.ssle_enabled = ($options.ssle_enabled ? 0 : 1);
