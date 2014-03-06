@@ -2,7 +2,7 @@
     "manifest_version": 2,
 
     "name": "SKN SSL Enforcer",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Force encrypted browsing with HTTPS",
     "homepage_url": "https://github.com/slackr/sslenforcer",
 
@@ -20,7 +20,7 @@
         "48": "img/ssle48.png",
         "128": "img/ssle128.png"
     },
-     
+
     "browser_action": {
         "default_icon": {
             "19": "img/disabled.png"
@@ -33,6 +33,6 @@
     "background": {
         "scripts": ["js/common.js", "js/background.js"]
     },
-    
+
     "content_security_policy": "script-src 'self'; object-src 'self'"
 }
