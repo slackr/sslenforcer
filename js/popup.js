@@ -57,7 +57,7 @@ function write_tab_status(ts) {
     for (var s = 0; s < priority_states.length; s++) {
         var state = priority_states[s];
         var state_data = data[state];
-
+        
         if (Object.keys(state_data).length > 0) {
             draw_state(state, state_data);
         } else {
@@ -67,7 +67,6 @@ function write_tab_status(ts) {
 }
 
 function draw_state(state, state_data) {
-
     for (var reason in state_data) {
         var urls = state_data[reason];
 
@@ -98,6 +97,7 @@ function draw_state(state, state_data) {
             var fullurl = urls[u].url;
             var url = fullurl.limit(75);
             var fulluri = urls[u].url.url_parse("uri");
+            var matched_pattern = typeof urls[u].pattern != "undefined" ? "Rule: " + urls[u].pattern : '';
 
             var fqdn = url.url_parse("fqdn");
             var uri = url.url_parse("uri");
@@ -140,6 +140,7 @@ function draw_state(state, state_data) {
                 .append(
                     $('<div>')
                     .addClass('fullurl')
+                    .attr('title', matched_pattern)
                     .append(
                         $('<span>')
                             .addClass('fqdn')

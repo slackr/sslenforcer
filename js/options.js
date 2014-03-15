@@ -24,8 +24,8 @@ function initialize_page() {
 }
 
 function populate_options() {
-    populate_urls('#folder_enforce', $options.ssle.enforce);
-    populate_urls('#folder_exclude', $options.ssle.exclude);
+    populate_rules('#folder_enforce', $options.ssle.enforce);
+    populate_rules('#folder_exclude', $options.ssle.exclude);
     
     $('#advanced_options, #enforce, #exclude').on("click", function() {
         $(this).next('div').toggle('fast');
@@ -56,39 +56,34 @@ function populate_options() {
         .on("click", function() {
             var rule_type = $(this).attr('id').split(/_/)[2];
             
-            $('#rule_uri, #rule_fqdn, #rule_id').val('');
-            $('#rule_subdomains_ui_checkbox').text($('#rule_subdomains_ui_checkbox').data("settings")['check_text']);
-            
+            $('#rule_pattern, #rule_id').val('');
             $('#rule_type').val(rule_type);
             
             show_popup();
-            
-            $('#rule_fqdn').focus();
+            $('#rule_pattern').focus();
         });
 
     $('#rule_save')
         .text('Save Rule')
         .on("click", function() {
             
-            var save_uri = $('#rule_uri').val();
             var save_type = $('#rule_type').val();
-            var save_fqdn = $('#rule_fqdn').val();
-            var save_subdomains = $('#rule_subdomains_ui_checkbox').data("is_checked");
+            var save_pattern = $('#rule_pattern').val();
             
-            if (typeof save_fqdn == 'undefined'
-                || save_fqdn == "") {
-                $('#rule_fqdn').addClass("ui_value_error").focus();
-                alert("Invalid FQDN (wikipedia.org, www.google.com)");
-                setTimeout(function() { $('#rule_fqdn').removeClass('ui_value_error'); }, 700);
+            if (typeof save_pattern == 'undefined'
+                || save_pattern == "") {
+                $('#rule_pattern').addClass("ui_value_error").focus();
+                alert("Invalid regex pattern (cannot be blank)");
+                setTimeout(function() { $('#rule_pattern').removeClass('ui_value_error'); }, 700);
                 return false;
             }
             
             var save_id = $('#rule_id').val();
             if (save_id == "") {
-                if (typeof $options.ssle[save_type][save_fqdn] != 'undefined') {
-                    $('#rule_fqdn').addClass("ui_value_error").focus();
-                    alert("A rule for '" + save_fqdn + "' already exists in the '" + save_type + "' ruleset.");
-                    setTimeout(function() { $('#rule_fqdn').removeClass('ui_value_error'); }, 700);
+                if (typeof $options.ssle[save_type][save_pattern] != 'undefined') {
+                    $('#rule_pattern').addClass("ui_value_error").focus();
+                    alert("A rule for '" + save_pattern + "' already exists in the '" + save_type + "' ruleset.");
+                    setTimeout(function() { $('#rule_pattern').removeClass('ui_value_error'); }, 700);
                     return false;
                 }
                 
@@ -102,10 +97,8 @@ function populate_options() {
             chrome.extension.sendRequest({
                     type: 'set_rule',
                     rule_type: save_type,
-                    rule_fqdn: save_fqdn,
+                    rule_pattern: save_pattern,
                     value: {
-                        subdomains: save_subdomains,
-                        uri: save_uri,
                         id: save_id
                     }
                 }, function (data) {
@@ -115,7 +108,7 @@ function populate_options() {
                         options_saved(data);
                         
                         $('#' + save_id).remove();
-                        create_url_record('#folder_' + save_type, save_fqdn, { subdomains: save_subdomains, id: save_id, uri: save_uri });
+                        create_rule_record('#folder_' + save_type, save_pattern, { id: save_id });
                         $('#' + save_id).hide();
                         $('#' + save_id).addClass('message');
                         $('#' + save_id).fadeIn('fast');
@@ -180,23 +173,41 @@ function populate_options() {
         }
     });
     
-    ui_attach_checkbox($('#rule_subdomains'), { on: 1, check_text: "*.", uncheck_text: "\u2006", title: "Include subdomains?" });
-}
-
-function populate_urls(div_id, urls) {
-    for (var entry in urls) {
-        create_url_record(div_id, entry, urls[entry])
+    ui_attach_checkbox($('#option_verbose_tab'), { on: $options.verbose_tab,
+        callback: function() {
+            chrome.extension.sendRequest({type: 'set_option', key: 'verbose_tab', value: $('#option_verbose_tab_ui_checkbox').data('is_checked') }, message_received);
+            chrome.extension.sendRequest({type: 'save_options'}, options_saved);
+        }
+    });
+    
+    for (var flag in $config.allowed_regex_flags) {
+        ui_attach_checkbox($('#option_regex_flags_' + flag), { on: ($options.regex_flags.match(flag) ? 1 : 0), check_text: flag, uncheck_text: "\u2006", title: $config.allowed_regex_flags[flag],
+            callback: function() {
+                var regex_flags_value = "";
+                for (var val in $config.allowed_regex_flags) {
+                    regex_flags_value += ($('#option_regex_flags_' + val + '_ui_checkbox').data('is_checked') == 1 ? val : '');
+                }
+                chrome.extension.sendRequest({type: 'set_option', key: 'regex_flags', value: regex_flags_value }, message_received);
+                chrome.extension.sendRequest({type: 'save_options'}, options_saved);
+            }
+        });
     }
 }
 
-function create_url_record(div_id, entry, entry_obj) {
+function populate_rules(div_id, rules) {
+    for (var rule in rules) {
+        create_rule_record(div_id, rule, rules[rule])
+    }
+}
+
+function create_rule_record(div_id, rule, ruleobj) {
     $(div_id).prepend(
         $('<div>')
             .addClass('table')
             .addClass('padded')
             .addClass('highlight')
             
-            .attr('id',entry_obj.id)
+            .attr('id',ruleobj.id)
             
             .hover(
                 function() {
@@ -211,7 +222,7 @@ function create_url_record(div_id, entry, entry_obj) {
                                 .text('Edit')
                                 
                                 .on('click', function() {
-                                    edit_url_entry($(this).closest('div').attr('id'));
+                                    edit_rule_entry($(this).closest('div').attr('id'));
                                 })
                             ,
                             $('<span>')
@@ -222,7 +233,7 @@ function create_url_record(div_id, entry, entry_obj) {
                                 .text('Delete')
                                 .on('click', function() {
                                     if (confirm('Are you sure?')) {
-                                        delete_url_entry($(this).closest('div').attr('id'));
+                                        delete_rule_entry($(this).closest('div').attr('id'));
                                     }
                                 })
                         )
@@ -239,11 +250,7 @@ function create_url_record(div_id, entry, entry_obj) {
                     .append(
                         $('<span>')
                             .addClass('padded')
-                            .text((entry_obj.subdomains ? '*.' : '') + entry)
-                        ,
-                        $('<span>')
-                            .addClass('uri')
-                            .text(entry_obj.uri + (entry_obj.uri == "" ? '/*' : ''))
+                            .text(rule)
                     )
                 ,
                 $('<span>')
@@ -263,8 +270,8 @@ function write_info(text) {
 }
 
 function ui_attach_checkbox(obj, settings) {
-    check_text = settings.check_text != undefined ? settings.check_text : '\u2714'; // checkmark
-    uncheck_text = settings.uncheck_text != undefined ? settings.uncheck_text : '\u2006'; // blank
+    var check_text = settings.check_text != undefined ? settings.check_text : '\u2714'; // checkmark
+    var uncheck_text = settings.uncheck_text != undefined ? settings.uncheck_text : '\u2006'; // blank
     
     obj.before(
         $('<span>')
@@ -279,7 +286,7 @@ function ui_attach_checkbox(obj, settings) {
             .data('is_checked', (settings.on ? 1 : 0))
             .on("click", function() {
                 $(this).text($(this).text() == check_text ? uncheck_text : check_text);
-                $(this).data("is_checked", ($(this).text() == settings.check_text ? 1 : 0));
+                $(this).data("is_checked", ($(this).text() == check_text ? 1 : 0));
                 if (settings.callback != undefined) {
                     settings.callback();
                 }
@@ -288,8 +295,8 @@ function ui_attach_checkbox(obj, settings) {
 }
 
 function ui_attach_value_changer(obj, settings) {
-    up_text = settings.up_text != undefined ? settings.up_text : '+'; //'\u039B';
-    down_text = settings.down_text != undefined ? settings.down_text : '-'; //'V';
+    var up_text = settings.up_text != undefined ? settings.up_text : '+'; //'\u039B';
+    var down_text = settings.down_text != undefined ? settings.down_text : '-'; //'V';
     
     obj.after(
         $('<span>')
@@ -340,42 +347,36 @@ function ui_attach_value_changer(obj, settings) {
     );
 }
 
-function delete_url_entry(delete_id) {
+function delete_rule_entry(delete_id) {
     var record = select_record_by_id(delete_id);
     if (typeof record != "undefined") {
         $('#' + delete_id)
             .addClass('warning')
             .fadeOut('fast');
                         
-        log("url type '" + record.type + "' with id '" + delete_id + "' was deleted", -1, "opt");
+        log("rule type '" + record.type + "' with id '" + delete_id + "' was deleted", -1, "opt");
         chrome.extension.sendRequest({type: 'delete_rule', id: delete_id, rule_type: record.type, rule_entry: record.entry}, message_received);
         chrome.extension.sendRequest({type: 'save_options'}, options_saved);
     } else {
-        log("record with id '" + delete_id + "' not found for deletion", 2, "rule");
+        log("rule with id '" + delete_id + "' not found for deletion", 2, "rule");
     }
 }
 
-function edit_url_entry(edit_id) {
+function edit_rule_entry(edit_id) {
     var record = select_record_by_id(edit_id);
     if (typeof record != "undefined") {
         
         $('#rule_id').val($options.ssle[record.type][record.entry].id);
         $('#rule_type').val(record.type);
-                        
-        $('#rule_fqdn').val(record.entry);
-        $('#rule_uri').val($options.ssle[record.type][record.entry].uri);
         
-        $('#rule_subdomains_ui_checkbox').text(
-            $('#rule_subdomains_ui_checkbox').data("settings")[($options.ssle[record.type][record.entry].subdomains ? "check_text" : "uncheck_text")]
-        );
-        
+        $('#rule_pattern').val(record.entry);
         
         $('#rule_title').text('Edit ' + (record.type == "exclude" ? "Exclusion" : "Enforcement") + ' Rule');
         
         show_popup();
-        $('#rule_fqdn').focus();
+        $('#rule_pattern').focus();
     } else {
-        log("record with id '" + edit_id + "' not found for edit", 2, "rule");
+        log("rule with id '" + edit_id + "' not found for edit", 2, "rule");
     }
 }
 
@@ -386,5 +387,5 @@ function options_saved(data) {
     }
     message_received(data);
     
-    write_info("Options successfully saved!");
+    write_info("Options successfully saved to storage!");
 }

@@ -14,15 +14,24 @@
     <div id="popup_message" class="padded">
         <div class="padded margined" id="rule_title"></div>
         <div class="padded margined warning">
-            If the URI field is left blank all URIs will be included in the rule (/*). To include only the root URI, use / <br />
+            SSLE uses regular expressions for rules.
+            <br />
+            Rules should not include the protocol (http://, https://) but may include the URI.
+            <br />
+            The anchors (^, $) are not implicit, use them as required.
         </div>
         <div class="table padded info" id="rule_area">
+            <div class="padded">
+                Match all subdomains and URIs: <span class="regex">^.*\.wikipedia\.org</span>
+                <br />
+                Match the fqdn its root URI only: <span class="regex">^www\.google\.com/$</span>
+                <br />
+                Match a specific URL: <span class="regex">^www\.rogers\.com/web/Rogers\.portal$</span>
+            </div>
             <span class="padded">
                 <input type="hidden" value="" id="rule_id" />
                 <input type="hidden" value="" id="rule_type" />
-                <span id="rule_subdomains" class="hidden"></span>
-                <input type="text" class="ui_textbox padded" value="" id="rule_fqdn" />
-                <input type="text" class="ui_textbox padded" value="" id="rule_uri" /> 
+                <input type="text" class="ui_textbox ui_textbox_longer padded" value="" id="rule_pattern" />
             </span>
             <span class="padded float_right">
                 <span id="rule_save" class="buttonize button_neutral padded"></span>
@@ -79,6 +88,18 @@
                         <span id="option_value_flood_hits" class="emphasis ui_value"></span> requests
                         in
                         <span id="option_value_flood_ms" class="emphasis ui_value"></span> miliseconds
+                    </span>
+                </div>
+                <div class="table margined">
+                    <label>Regex Flags</label>
+                    <span class="float_right">
+                        <span id="option_regex_flags_i" class="hidden"></span><span id="option_regex_flags_g" class="hidden"></span>
+                    </span>
+                </div>
+                <div class="table margined">
+                    <label>Verbose tab status</label>
+                    <span class="float_right">
+                        <span id="option_verbose_tab" class="hidden"></span>
                     </span>
                 </div>
             </div>                

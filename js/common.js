@@ -41,12 +41,12 @@ function set_icon(icon, tid) {
             path: $config.icons[icon],
             tabId: tid
         });
-        
+
         log("icon set to '" + icon + "' on tab: " + tid, -2, "debug");
     } else {
         log("icon not set for tab: " + tid, -2, "debug");
     }
-    
+
 }
 
 function update_badge_text() {
@@ -74,10 +74,10 @@ function toggle_ssle() {
         .addClass($options.ssle_enabled ? "button_on" : "button_off")
         .removeClass(!$options.ssle_enabled ? "button_on" : "button_off")
         .text($options.ssle_enabled ? "Enabled" : "Disabled");
-    
+
     chrome.extension.sendRequest({type: 'set_option', key: 'ssle_enabled', value: $options.ssle_enabled}, message_received);
     chrome.extension.sendRequest({type: 'save_options'}, message_received);
-    
+
     update_badge_text();
 }
 
@@ -90,7 +90,7 @@ function uniq_id() {
         return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
     };
     var id = "i" + (S4() + S4());
-    
+
     if (typeof select_record_by_id(id) != "undefined") {
         id = uniq_id();
     }
@@ -165,5 +165,12 @@ String.prototype.limit = function(limit, no_dots) {
  * returns true if string starts with https://
  */
 String.prototype.is_https = function() {
-    return (this.match(/^https:\/\/.+$/im) != null ? true : false);
+    return (this.substr(0,8) == "https://" ? true : false);
+}
+
+/**
+ * escape regex special chars, stolen from mozilla
+ */
+String.prototype.escape_regex = function() {
+    return this.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
