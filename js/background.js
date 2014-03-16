@@ -26,15 +26,16 @@ var $options_defaults = {
 
     ssle : {
         enforce: {
-            '^.*\\.google\\.(ca|com)/.*$': { id: "iafcc8854" },
-            '^.*\\.wikipedia\\.org/.*$': { id: "ia74d8e02" },
-            '^.*\\.chrome\\.com/.*$': { id: "ie7b9ad91" },
+            '^[a-z0-9\\-\\.]*google\\.(ca|com)/.*$': { id: "iafcc8854" },
+            '^[a-z0-9\\-\\.]*wikipedia\\.org/.*$': { id: "ia74d8e02" },
+            '^[a-z0-9\\-\\.]*chrome\\.com/.*$': { id: "ie7b9ad91" },
             '^www\\.rogers\\.com/web/Rogers\\.portal$': { id: "ic1b9f0f8" },
-            '^.*\\.linkedin\\.com/.*$': { id: "i5c9f10bf" },
-            '^.*\\.facebook\\.com/.*$': { id: "iee48a9a4" },
-            '^.*\\.twitter\\.com/.*$': { id: "i1a845a6a" },
-            '^.*\\.fbcdn\\.net/.*$': { id: "ib4575dbb" },
-            '^.*\\.webcache\\.googleusercontent\\.com/.*$': { id: "ib2890983" },
+            '^[a-z0-9\\-\\.]*linkedin\\.com/.*$': { id: "i5c9f10bf" },
+            '^[a-z0-9\\-\\.]*facebook\\.com/.*$': { id: "iee48a9a4" },
+            '^[a-z0-9\\-\\.]*twitter\\.com/.*$': { id: "i1a845a6a" },
+            '^[a-z0-9\\-\\.]*fbcdn\\.net/.*$': { id: "ib4575dbb" },
+            '^[a-z0-9\\-\\.]*imgur\\.com/.*$': { id: "ib4575dbb" },
+            '^webcache\\.googleusercontent\\.com/.*$': { id: "ib2890983" },
         },
         exclude: {
             // /blank.html causes issues with http://www.google.ca/imgres urls
@@ -515,10 +516,16 @@ function save_options(callback) {
 function convert_legacy_ruleset(ruleset) {
     for (var type in ruleset) {
         for (var rule in ruleset[type]) {
+            if (rule.substr(0,6) == "^.*\\.") { // fix conversion issue from 1.0.2
+                var rule_fix = "^[a-z0-9\\-\\.]*" + rule.substr(5);
+                ruleset[type][rule_fix] = { id: ruleset[type][rule].id };
+                delete ruleset[type][rule];
+                log("rule fix '" + rule + "' -> '" + rule_fix + "' = '" + JSON.stringify(ruleset[type][rule_fix]) + "'",  $options_defaults.log_level, "legacy")
+            }
             if (typeof ruleset[type][rule].subdomains != 'undefined') {
                 var regex_rule = rule.escape_regex();
                 
-                regex_rule = ((ruleset[type][rule].subdomains == 1) ? "^.*\\." : "^") + regex_rule;
+                regex_rule = ((ruleset[type][rule].subdomains == 1) ? "^[a-z0-9\\-\\.]*" : "^") + regex_rule;
                 regex_rule = regex_rule + ((ruleset[type][rule].uri != "") ? ruleset[type][rule].uri.escape_regex() + "$" : "/.*$");
                 
                 ruleset[type][regex_rule] = { id: ruleset[type][rule].id };
