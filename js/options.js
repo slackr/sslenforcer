@@ -51,6 +51,17 @@ function populate_options() {
                 });
             }
         });
+        
+    $('#ext_export_options')
+        .text('Export Options')
+        .on("click", function() {
+            export_options();
+        });
+    $('#ext_import_options')
+        .text('Import Options')
+        .on("click", function() {
+            show_popup('#popup_import_options');
+        }); 
     
     $('#rule_add_enforce, #rule_add_exclude')
         .on("click", function() {
@@ -59,7 +70,7 @@ function populate_options() {
             $('#rule_pattern, #rule_id').val('');
             $('#rule_type').val(rule_type);
             
-            show_popup();
+            show_popup('#popup_rule');
             $('#rule_pattern').focus();
         });
 
@@ -130,11 +141,22 @@ function populate_options() {
             
             return true; 
         });
-        
+    
+    $('#import_options')
+        .text('Import Options')
+        .on("click", function() {
+            import_options();
+        });
+    
     $('#rule_cancel')
         .text('Cancel')
         .on("click", function() {
-            hide_popup();
+            hide_popup('#popup_rule');
+        });
+    $('#import_cancel')
+        .text('Cancel')
+        .on("click", function() {
+            hide_popup('#popup_import_options');
         });
         
     $('#option_value_flood_hits').text($options.flood.hits);
@@ -373,7 +395,7 @@ function edit_rule_entry(edit_id) {
         
         $('#rule_title').text('Edit ' + (record.type == "exclude" ? "Exclusion" : "Enforcement") + ' Rule');
         
-        show_popup();
+        show_popup('#popup_rule');
         $('#rule_pattern').focus();
     } else {
         log("rule with id '" + edit_id + "' not found for edit", 2, "rule");
@@ -388,4 +410,72 @@ function options_saved(data) {
     message_received(data);
     
     write_info("Options successfully saved to storage!");
+}
+
+function export_options() {
+    var filename = 'ssle_options.json';
+    var data = encodeURIComponent(JSON.stringify($options));
+    $('body').append(
+        $('<a>')            
+            .attr('id', 'export_options')
+            .attr('href','data:text/plain;charset=utf-8,' + data)
+            .attr('download', filename)
+    );
+    $('#export_options')[0].click();
+    $('#export_options').remove();
+}
+
+function cleanup_imported_options(data) {
+    var json = null;
+    try {
+        json = JSON.parse(data)
+    } catch (e) {
+        alert('File import failed: ' + e);
+        return false;
+    }
+    if (typeof json == 'object') {
+        for (var key in json) { // sanity check
+            if (typeof $options[key] == undefined) {
+                delete json[key];
+            }
+        }
+    }
+    log("import options cleanup: " + JSON.stringify(json), -2, "import");
+    return json;
+}
+
+/**
+ * got this from: https://groups.google.com/a/chromium.org/forum/#!topic/chromium-extensions/cvC-kCVjDuE
+ */
+function import_options() {
+    var files = $('#import_options_file')[0].files;
+    
+    if (!(files instanceof FileList) || files.length === 0){ 
+        alert('Please select an options file to import (JSON format)'); 
+        return false; 
+    }
+    
+    if (files[0].size > $config.max_import_filesize) {
+        alert('Options file too large. Limit: ' + ($config.max_import_filesize / 1024).toFixed(0) + 'KB');
+        return false;
+    }
+    
+    var read = new FileReader(); 
+
+    // import only when file has finished loading 
+    read.onloadend = (function(file){ 
+        return function(e) {
+            // import_options() will do a sanity check before writing to memory
+            var clean_options = cleanup_imported_options(e.target.result);
+            if (clean_options) { // e.target.result is the content
+                $('#import_options').text('Importing...');
+                chrome.extension.sendRequest({type: 'import_options', options: clean_options}, function(data) {
+                    message_received(data);
+                    window.location.reload();
+                });
+            }
+        } 
+    })(files[0]); // files[0] assumes only one file has been selected 
+
+    return read.readAsText(files[0]);
 }

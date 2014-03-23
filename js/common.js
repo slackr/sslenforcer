@@ -97,11 +97,11 @@ function uniq_id() {
     return id;
 }
 
-function show_popup() {
-    $('#popup').fadeIn('fast');
+function show_popup(popup_id) {
+    $(popup_id).fadeIn('fast');
 }
-function hide_popup() {
-    $('#popup').fadeOut('fast');
+function hide_popup(popup_id) {
+    $(popup_id).fadeOut('fast');
 }
 
 /**

@@ -10,8 +10,25 @@
     <script type="text/javascript" src="../js/options.js"></script>
 </head>
 <body>
-<div id="popup" class="hidden">
-    <div id="popup_message" class="padded">
+<div id="popup_import_options" class="popup_wrapper hidden">
+    <div id="popup_import_options_message" class="popup_message padded">
+        <div class="padded margined" id="import_title"></div>
+        <div class="padded margined warning">
+            Select a settings file to import (JSON format)
+        </div>
+        <div class="table padded info" id="import_area">
+            <span class="padded">
+                <input type="file" class="ui_textbox ui_textbox_longer padded" value="" id="import_options_file" />
+            </span>
+            <span class="padded float_right">
+                <span id="import_options" class="buttonize button_neutral padded"></span>
+                <span id="import_cancel" class="buttonize button_neutral padded"></span>
+            </span>
+        </div>  
+    </div>
+</div>
+<div id="popup_rule" class="popup_wrapper hidden">
+    <div id="popup_rule_message" class="popup_message padded">
         <div class="padded margined" id="rule_title"></div>
         <div class="padded margined warning">
             SSLE uses regular expressions for rules.
@@ -49,6 +66,8 @@
         <div id="header" class="table">
             <label><span id="ext_name"></span> <span id="ext_version" class="emphasis"></span></label>
             <span class="float_right">
+                <span id="ext_import_options" class="buttonize button_neutral padded"></span>
+                <span id="ext_export_options" class="buttonize button_neutral padded"></span>
                 <span id="ext_restore_defaults" class="buttonize button_neutral padded"></span>
                 <span id="ext_save_options" class="buttonize button_neutral padded"></span>
             </span>

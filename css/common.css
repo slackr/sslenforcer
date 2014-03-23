@@ -129,3 +129,23 @@ div.table .float_right {
 .domain:hover {
     background-color: #4d4d4d;
 }
+
+.popup_wrapper {
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    z-index: 1001;
+    background-color: rgba(0,0,0,0.8);
+}
+.popup_message {
+    position: absolute;
+    top: 40%;
+    left: 25%;
+    width: 800px;
+    z-index: 1002;
+    overflow: auto;
+    background-color: rgba(0,0,0,1);
+}

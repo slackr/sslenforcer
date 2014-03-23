@@ -54,6 +54,7 @@ var $options = JSON.parse(JSON.stringify($options_defaults));
  * engine config
  */
 var $config = {
+    max_import_filesize: 5242880, //5mb
     save_options_delay: 3000,
     allowed_regex_flags: {
         "i" : "Case-Insensitive",
@@ -237,7 +238,16 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
                 })
             });
             break;
-
+        case 'import_options':
+            $options = req.options;
+            
+            save_options(function() {
+                sendResponse({
+                   message: "options imported"
+                })
+            });
+            break;
+        
         case 'set_option':
             $options[req.key] = req.value;
 
