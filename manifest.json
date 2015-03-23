@@ -5,6 +5,7 @@
     "version": "1.2.0",
     "description": "Force encrypted browsing with HTTPS",
     "homepage_url": "https://github.com/slackr/sslenforcer",
+    "short_name": "SSLE",
 
     "permissions": [
         "http://*/*",
@@ -28,7 +29,7 @@
         "default_popup": "html/popup.html"
     },
 
-   "options_page": "html/options.html",
+    "options_page": "html/options.html",
 
     "background": {
         "scripts": ["js/common.js", "js/background.js"]
