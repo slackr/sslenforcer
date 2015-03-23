@@ -24,7 +24,7 @@
                 <span id="import_options" class="buttonize button_neutral padded"></span>
                 <span id="import_cancel" class="buttonize button_neutral padded"></span>
             </span>
-        </div>  
+        </div>
     </div>
 </div>
 <div id="popup_rule" class="popup_wrapper hidden">
@@ -51,10 +51,11 @@
                 <input type="text" class="ui_textbox ui_textbox_longer padded" value="" id="rule_pattern" />
             </span>
             <span class="padded float_right">
+                <span id="rule_delete" class="buttonize button_neutral padded hidden"></span>
                 <span id="rule_save" class="buttonize button_neutral padded"></span>
                 <span id="rule_cancel" class="buttonize button_neutral padded"></span>
             </span>
-        </div>  
+        </div>
     </div>
 </div>
 <div id="container">
@@ -72,21 +73,21 @@
                 <span id="ext_save_options" class="buttonize button_neutral padded"></span>
             </span>
         </div>
-        
+
         <div class="padded warning">
             <strong>Warning:</strong> Options are not encrypted in storage. Do not add URLs with sensitive information (usernames, passwords, session IDs).
         </div>
-        
-        <div id="main">                
+
+        <div id="main">
             <div id="enforce" class="buttonize padded folder enforce table">URLs to enforce</div>
             <div id="folder_enforce" class="table visible">
                 <div class="padded margined"><span id="rule_add_enforce" class="buttonize button_neutral padded float_right">Add Rule</span></div>
             </div>
             <div id="exclude" class="buttonize padded folder exclude table">Exclusions</div>
-            <div id="folder_exclude" class="table hidden">        
+            <div id="folder_exclude" class="table hidden">
                 <div class="padded margined"><span id="rule_add_exclude" class="buttonize button_neutral padded float_right">Add Rule</span></div>
             </div>
-            
+
             <div id="advanced_options" class="buttonize padded folder">Advanced Options</div>
             <div id="folder_advanced_options" class="hidden">
                 <div class="table margined">
@@ -121,7 +122,7 @@
                         <span id="option_verbose_tab" class="hidden"></span>
                     </span>
                 </div>
-            </div>                
+            </div>
         </div>
     </div>
 </div>

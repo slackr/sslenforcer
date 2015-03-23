@@ -6,7 +6,7 @@ $(document).ready(function($) {
         log("retrieved $options and $config from background.js", -2, "debug");
         $options = ret.options;
         $config = ret.config;
-        
+
         initialize_page();
     });
 });
@@ -14,23 +14,23 @@ $(document).ready(function($) {
 function initialize_page() {
     var ext_name = chrome.app.getDetails().name;
     var ext_version = chrome.app.getDetails().version;
-    
+
     $('#ext_name').text(ext_name);
     $('#ext_version').text(ext_version);
 
     document.title = ext_name + " (" + ext_version + ") Options";
-    
+
     populate_options();
 }
 
 function populate_options() {
     populate_rules('#folder_enforce', $options.ssle.enforce);
     populate_rules('#folder_exclude', $options.ssle.exclude);
-    
+
     $('#advanced_options, #enforce, #exclude').on("click", function() {
         $(this).next('div').toggle('fast');
     });
-    
+
     $('#ext_save_options')
         .text('Save Options')
         .on("click", function() {
@@ -51,7 +51,7 @@ function populate_options() {
                 });
             }
         });
-        
+
     $('#ext_export_options')
         .text('Export Options')
         .on("click", function() {
@@ -61,26 +61,37 @@ function populate_options() {
         .text('Import Options')
         .on("click", function() {
             show_popup('#popup_import_options');
-        }); 
-    
+        });
+
     $('#rule_add_enforce, #rule_add_exclude')
         .on("click", function() {
             var rule_type = $(this).attr('id').split(/_/)[2];
-            
+
             $('#rule_pattern, #rule_id').val('');
             $('#rule_type').val(rule_type);
-            
+
+            $('#rule_delete').addClass('hidden');
             show_popup('#popup_rule');
             $('#rule_pattern').focus();
+        });
+
+    $('#rule_delete')
+        .text('Delete Rule')
+        .on("click", function() {
+            if (confirm('Are you sure you want to delete this rule?')) {
+                var rule_id = $('#rule_id').val();
+                delete_rule_entry(rule_id);
+                hide_popup('#popup_rule');
+            }
         });
 
     $('#rule_save')
         .text('Save Rule')
         .on("click", function() {
-            
+
             var save_type = $('#rule_type').val();
             var save_pattern = $('#rule_pattern').val();
-            
+
             if (typeof save_pattern == 'undefined'
                 || save_pattern == "") {
                 $('#rule_pattern').addClass("ui_value_error").focus();
@@ -88,7 +99,7 @@ function populate_options() {
                 setTimeout(function() { $('#rule_pattern').removeClass('ui_value_error'); }, 700);
                 return false;
             }
-            
+
             var save_id = $('#rule_id').val();
             if (save_id == "") {
                 if (typeof $options.ssle[save_type][save_pattern] != 'undefined') {
@@ -97,14 +108,14 @@ function populate_options() {
                     setTimeout(function() { $('#rule_pattern').removeClass('ui_value_error'); }, 700);
                     return false;
                 }
-                
+
                 save_id = uniq_id();
             }
-            
+
             $(this)
                 .addClass("message")
                 .text('Saving...');
-            
+
             chrome.extension.sendRequest({
                     type: 'set_rule',
                     rule_type: save_type,
@@ -114,40 +125,40 @@ function populate_options() {
                     }
                 }, function (data) {
                     message_received(data);
-                    
+
                     chrome.extension.sendRequest({type: 'save_options'}, function(data) {
                         options_saved(data);
-                        
+
                         $('#' + save_id).remove();
                         create_rule_record('#folder_' + save_type, save_pattern, { id: save_id });
                         $('#' + save_id).hide();
                         $('#' + save_id).addClass('message');
                         $('#' + save_id).fadeIn('fast');
-                        
+
                         setTimeout(function() {
                             $('#' + save_id).hide();
                             $('#' + save_id).removeClass('message');
                             $('#' + save_id).fadeIn('fast');
                         }, 700);
-                        
-                        hide_popup();
-                        
+
+                        hide_popup('#popup_rule');
+
                         $('#rule_save')
                             .removeClass("message")
                             .text('Save Rule');
                     });
                 }
             );
-            
-            return true; 
+
+            return true;
         });
-    
+
     $('#import_options')
         .text('Import Options')
         .on("click", function() {
             import_options();
         });
-    
+
     $('#rule_cancel')
         .text('Cancel')
         .on("click", function() {
@@ -158,12 +169,12 @@ function populate_options() {
         .on("click", function() {
             hide_popup('#popup_import_options');
         });
-        
+
     $('#option_value_flood_hits').text($options.flood.hits);
     $('#option_value_flood_ms').text($options.flood.ms);
     $('#option_value_log_level').text($options.log_level);
     $('#option_value_max_tab_status').text($options.max_tab_status);
-    
+
     ui_attach_value_changer($('#option_value_flood_hits'), { title: "Improper values may cause redirect loops on sites which insist on HTTP", inc_value: 1, lowest: 1, highest: 20,
         callback: function() {
             chrome.extension.sendRequest({type: 'set_option', key: 'flood', value: {
@@ -194,14 +205,14 @@ function populate_options() {
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
-    
+
     ui_attach_checkbox($('#option_verbose_tab'), { on: $options.verbose_tab,
         callback: function() {
             chrome.extension.sendRequest({type: 'set_option', key: 'verbose_tab', value: $('#option_verbose_tab_ui_checkbox').data('is_checked') }, message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
-    
+
     for (var flag in $config.allowed_regex_flags) {
         ui_attach_checkbox($('#option_regex_flags_' + flag), { on: ($options.regex_flags.match(flag) ? 1 : 0), check_text: flag, uncheck_text: "\u2006", title: $config.allowed_regex_flags[flag],
             callback: function() {
@@ -228,58 +239,65 @@ function create_rule_record(div_id, rule, ruleobj) {
             .addClass('table')
             .addClass('padded')
             .addClass('highlight')
-            
+
+            .addClass('buttonize')
+
             .attr('id',ruleobj.id)
-            
-            .hover(
-                function() {
-                    $(this)
-                        .children('#hover_button_container')
-                        .append(
-                            $('<span>')
-                                .addClass('buttonize')
-                                .addClass('button_neutral')
-                                .addClass('padded')
-                                
-                                .text('Edit')
-                                
-                                .on('click', function() {
-                                    edit_rule_entry($(this).closest('div').attr('id'));
-                                })
-                            ,
-                            $('<span>')
-                                .addClass('buttonize')
-                                .addClass('button_neutral')
-                                .addClass('padded')
-                                
-                                .text('Delete')
-                                .on('click', function() {
-                                    if (confirm('Are you sure?')) {
-                                        delete_rule_entry($(this).closest('div').attr('id'));
-                                    }
-                                })
-                        )
-                },
-                function() {
-                    $(this)
-                        .children('#hover_button_container')
-                        .text('')
-                }                    
-            )
+
+            //.hover(
+            //    function() {
+            //        $(this)
+            //            .children('#hover_button_container')
+            //            .append(
+            //                $('<span>')
+            //                    .addClass('buttonize')
+            //                    .addClass('button_neutral')
+            //                    .addClass('padded')
+            //
+            //                    .text('Edit')
+            //
+            //                    .on('click', function() {
+            //                        edit_rule_entry($(this).closest('div').attr('id'));
+            //                    })
+            //                ,
+            //                $('<span>')
+            //                    .addClass('buttonize')
+            //                    .addClass('button_neutral')
+            //                    .addClass('padded')
+            //
+            //                    .text('Delete')
+            //                    .on('click', function() {
+            //                        if (confirm('Are you sure?')) {
+            //                            delete_rule_entry($(this).closest('div').attr('id'));
+            //                        }
+            //                    })
+            //            )
+            //    },
+            //    function() {
+            //        $(this)
+            //            .children('#hover_button_container')
+            //            .text('')
+            //    }
+            //)
             .append(
                 $('<label>')
                     .addClass('padded')
+                    .addClass('buttonize')
                     .append(
                         $('<span>')
                             .addClass('padded')
                             .text(rule)
                     )
-                ,
-                $('<span>')
-                    .addClass('padded')
-                    .addClass('float_right')
-                    .attr('id','hover_button_container')
+                //,
+                //$('<span>')
+                //    .addClass('padded')
+                //    .addClass('float_right')
+                //    .attr('id','hover_button_container')
             )
+
+            .on('click', function() {
+                edit_rule_entry($(this).attr('id'));
+            })
     );
 }
 
@@ -287,14 +305,14 @@ function write_info(text) {
     $('#info')
         .text(text)
         .show('fast');
-    
+
     setTimeout(function() { $('#info').hide('fast'); }, 5000);
 }
 
 function ui_attach_checkbox(obj, settings) {
     var check_text = settings.check_text != undefined ? settings.check_text : '\u2714'; // checkmark
     var uncheck_text = settings.uncheck_text != undefined ? settings.uncheck_text : '\u2006'; // blank
-    
+
     obj.before(
         $('<span>')
             .attr('id',obj.attr('id') + '_ui_checkbox')
@@ -319,7 +337,7 @@ function ui_attach_checkbox(obj, settings) {
 function ui_attach_value_changer(obj, settings) {
     var up_text = settings.up_text != undefined ? settings.up_text : '+'; //'\u039B';
     var down_text = settings.down_text != undefined ? settings.down_text : '-'; //'V';
-    
+
     obj.after(
         $('<span>')
             .attr('id',obj.attr('id') + '_ui_value_down')
@@ -375,7 +393,7 @@ function delete_rule_entry(delete_id) {
         $('#' + delete_id)
             .addClass('warning')
             .fadeOut('fast');
-                        
+
         log("rule type '" + record.type + "' with id '" + delete_id + "' was deleted", -1, "opt");
         chrome.extension.sendRequest({type: 'delete_rule', id: delete_id, rule_type: record.type, rule_entry: record.entry}, message_received);
         chrome.extension.sendRequest({type: 'save_options'}, options_saved);
@@ -387,14 +405,15 @@ function delete_rule_entry(delete_id) {
 function edit_rule_entry(edit_id) {
     var record = select_record_by_id(edit_id);
     if (typeof record != "undefined") {
-        
+
         $('#rule_id').val($options.ssle[record.type][record.entry].id);
         $('#rule_type').val(record.type);
-        
+
         $('#rule_pattern').val(record.entry);
-        
+
         $('#rule_title').text('Edit ' + (record.type == "exclude" ? "Exclusion" : "Enforcement") + ' Rule');
-        
+
+        $('#rule_delete').removeClass('hidden');
         show_popup('#popup_rule');
         $('#rule_pattern').focus();
     } else {
@@ -408,7 +427,7 @@ function options_saved(data) {
         $options = data.options;
     }
     message_received(data);
-    
+
     write_info("Options successfully saved to storage!");
 }
 
@@ -416,7 +435,7 @@ function export_options() {
     var filename = 'ssle_options.json';
     var data = encodeURIComponent(JSON.stringify($options));
     $('body').append(
-        $('<a>')            
+        $('<a>')
             .attr('id', 'export_options')
             .attr('href','data:text/plain;charset=utf-8,' + data)
             .attr('download', filename)
@@ -449,21 +468,21 @@ function cleanup_imported_options(data) {
  */
 function import_options() {
     var files = $('#import_options_file')[0].files;
-    
-    if (!(files instanceof FileList) || files.length === 0){ 
-        alert('Please select an options file to import (JSON format)'); 
-        return false; 
+
+    if (!(files instanceof FileList) || files.length === 0){
+        alert('Please select an options file to import (JSON format)');
+        return false;
     }
-    
+
     if (files[0].size > $config.max_import_filesize) {
         alert('Options file too large. Limit: ' + ($config.max_import_filesize / 1024).toFixed(0) + 'KB');
         return false;
     }
-    
-    var read = new FileReader(); 
 
-    // import only when file has finished loading 
-    read.onloadend = (function(file){ 
+    var read = new FileReader();
+
+    // import only when file has finished loading
+    read.onloadend = (function(file){
         return function(e) {
             // import_options() will do a sanity check before writing to memory
             var clean_options = cleanup_imported_options(e.target.result);
@@ -474,8 +493,8 @@ function import_options() {
                     window.location.reload();
                 });
             }
-        } 
-    })(files[0]); // files[0] assumes only one file has been selected 
+        }
+    })(files[0]); // files[0] assumes only one file has been selected
 
     return read.readAsText(files[0]);
 }

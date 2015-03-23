@@ -240,14 +240,14 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
             break;
         case 'import_options':
             $options = req.options;
-            
+
             save_options(function() {
                 sendResponse({
                    message: "options imported"
                 })
             });
             break;
-        
+
         case 'set_option':
             $options[req.key] = req.value;
 
@@ -262,7 +262,7 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
             } else { //cleanup existing rule before an edit
                 delete_record_by_id(req.value.id);
             }
-            
+
             $options.ssle[req.rule_type][req.rule_pattern] = req.value;
 
             sendResponse({
@@ -328,7 +328,7 @@ function se(data) {
                 url: fqdn + uri,
                 pattern: pattern
             });
-            
+
             log(status_msg, 1, "enforce");
             return { cancel: false };
         }
@@ -346,7 +346,7 @@ function se(data) {
             return (url.is_https() ? { cancel: false } : flood_check(fqdn + uri, secure_url, tid));
         }
     }
-    
+
     if (url.is_https()) {
         status_msg = "url '" + fqdn + uri + "' is already https, ignoring";
 
@@ -359,7 +359,7 @@ function se(data) {
         log(status_msg, 1, "enforce");
         return { cancel: false };
     }
-    
+
     // no rules matched, url is not https
     status_msg = "no rules matched for url: " + fqdn + "/" + uri;
     push_tab_status("disabled", tid, 0, {
@@ -495,7 +495,7 @@ function get_options(callback, convert_legacy) {
 
         } else {
             if (convert_legacy) { items.options.ssle = convert_legacy_ruleset(items.options.ssle); }
-            
+
             for (var o in items.options) {
                 $options[o] = items.options[o];
             }
@@ -534,13 +534,13 @@ function convert_legacy_ruleset(ruleset) {
             }
             if (typeof ruleset[type][rule].subdomains != 'undefined') {
                 var regex_rule = rule.escape_regex();
-                
+
                 regex_rule = ((ruleset[type][rule].subdomains == 1) ? "^[a-z0-9\\-\\.]*" : "^") + regex_rule;
                 regex_rule = regex_rule + ((ruleset[type][rule].uri != "") ? ruleset[type][rule].uri.escape_regex() + "$" : "/.*$");
-                
+
                 ruleset[type][regex_rule] = { id: ruleset[type][rule].id };
                 delete ruleset[type][rule];
-                
+
                 log("converted legacy rule '" + rule + "' -> '" + regex_rule + "' = '" + JSON.stringify(ruleset[type][regex_rule]) + "'",  $options_defaults.log_level, "legacy")
             }
         }
