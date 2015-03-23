@@ -75,6 +75,20 @@ function populate_options() {
             $('#rule_pattern').focus();
         });
 
+
+    $('#rule_sync_enforce, #rule_sync_exclude')
+        .on("click", function() {
+            if (confirm('Sync active ruleset with default ruleset? This will import default rules without overwriting existing ones.')) {
+                $('#rule_sync_enforce, #rule_sync_exclude')
+                    .addClass("message")
+                    .text('Syncing Ruleset...');
+
+                chrome.extension.sendRequest({type: 'sync_with_default_ruleset'}, function(data) {
+                    window.location.reload();
+                });
+            }
+        });
+
     $('#rule_delete')
         .text('Delete Rule')
         .on("click", function() {

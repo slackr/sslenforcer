@@ -180,8 +180,10 @@ chrome.runtime.onInstalled.addListener(function(details) {
             save_options(); // write hard defaults
             break;
         case "update":
-            log("initializing extension...", $options_defaults.log_level, "update");
-            get_options(null, true);
+            var pv = details.previousVersion;
+
+            log("initializing extension... (previous version: " + pv + ")", $options_defaults.log_level, "update");
+            get_options(null, (version_compare('1.0.2', pv) >= 0 ? true : false));
             break;
 
     }
@@ -232,6 +234,17 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
                message: "storage was cleared and default options were restored"
             });
             break;
+
+        case 'sync_with_default_ruleset':
+            sync_with_default_ruleset();
+            save_options(function() {
+                sendResponse({
+                   message: "synced with default ruleset",
+                   options: $options
+                })
+            });
+            break;
+
 
         case 'save_options':
             save_options(function() {
@@ -383,11 +396,11 @@ function se(data) {
 function flood_check(url, secure_url, tid) {
     var status_msg = "";
 
-    if ($flood[url] == undefined) {
+    if (typeof $flood[url] == 'undefined') {
         log("url not tracked, initializing: " + url, -1, "flood");
         $flood[url] = { hits: 1 };
         setTimeout(function() {
-            if ($flood[url] != undefined) {
+            if (typeof $flood[url] != 'undefined') {
                 log("tracking expired for: " + url, -1, "flood");
                 delete $flood[url];
             }
@@ -414,7 +427,7 @@ function flood_check(url, secure_url, tid) {
  * write url enforcement information to tab_status
  */
 function push_tab_status(state, tid, reason, data) {
-    if ($tab_status[tid][state][reason] == undefined) {
+    if (typeof $tab_status[tid][state][reason] == 'undefined') {
         $tab_status[tid][state][reason] = [];
     }
 
@@ -435,7 +448,7 @@ function tab_reason_url_count(tid, state, reason) {
  */
 function tab_has_status(tid) {
     var has_status = false;
-    if ($tab_status[tid] != undefined) {
+    if (typeof $tab_status[tid] != 'undefined') {
         for (var state in $config.states) {
             if (Object.keys($tab_status[tid][state]).length > 0) {
                 has_status = true;
@@ -453,7 +466,7 @@ function tab_has_status(tid) {
  * which is filtered by $config.filters
  */
 function url_isin_types(url) {
-    if ($tab_status[tid] != undefined) {
+    if (typeof $tab_status[tid] != 'undefined') {
         for (var state in $config.states) {
             if ($tab_status[tid][state].contains(u)) {
                 return true;
@@ -489,15 +502,18 @@ function init_tab(tid) {
  */
 function get_options(callback, convert_legacy) {
     $storage.get("options", function(items) {
-        if (chrome.runtime.lastError != undefined)
-            log("error on storage.get: " + JSON.stringify(chrome.runtime.lastError), 2, "storage");
+        if (typeof chrome.runtime.lastError != 'undefined') {
+            log("error on storage.get: " + JSON.stringify(chrome.runtime.lastError), $options_defaults.log_level, "storage");
+        }
 
-        if (items.options == undefined) {
-            log("no options in storage, using hard defaults", 0, "storage");
+        if (typeof items.options == 'undefined') {
+            log("no options in storage, using hard defaults", $options_defaults.log_level, "storage");
             $options = JSON.parse(JSON.stringify($options_defaults));
-
         } else {
-            if (convert_legacy) { items.options.ssle = convert_legacy_ruleset(items.options.ssle); }
+            if (convert_legacy) {
+                log('performing legacy ruleset conversion', $options_defaults.log_level, 'ruleset');
+                items.options.ssle = convert_legacy_ruleset(items.options.ssle);
+            }
 
             for (var o in items.options) {
                 $options[o] = items.options[o];
@@ -549,4 +565,44 @@ function convert_legacy_ruleset(ruleset) {
         }
     }
     return ruleset;
+}
+
+/**
+ * Compare two version strings, must be single digits:
+ *
+ * 1.2.3 cmp 1.2.5
+ *
+ * not 1.2.45 cmp 1.2.5
+ *
+ * Returns 0 if equal, 1 if v1 is greater, -1 if v2 is greater
+ *
+ * @param   {string} v1 Version one to compare
+ * @param   {string} v2 Version two to compare
+ *
+ * @returns {int} Returns 0 if equal, 1 if v1 is greater, -1 if v2 is greater
+ */
+function version_compare(v1, v2) {
+    v1 = parseInt(v1.replace(/[^0-9]+/gi,''));
+    v2 = parseInt(v2.replace(/[^0-9]+/gi,''));
+
+    if (v1 == v2) {
+        return 0;
+    } else if (v1 > v2) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
+
+/**
+ * Syncs current ruleset with default ruleset
+ *
+ * @returns {null}
+ */
+function sync_with_default_ruleset() {
+    for (var ruleset_type in $options_defaults.ssle) {
+        for (var rule in $options_defaults.ssle[ruleset_type]) {
+            $options.ssle[ruleset_type][rule] = $options_defaults.ssle[ruleset_type][rule];
+        }
+    }
 }
