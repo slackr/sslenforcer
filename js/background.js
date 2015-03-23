@@ -29,13 +29,16 @@ var $options_defaults = {
             '^[a-z0-9\\-\\.]*google\\.(ca|com)/.*$': { id: "iafcc8854" },
             '^[a-z0-9\\-\\.]*wikipedia\\.org/.*$': { id: "ia74d8e02" },
             '^[a-z0-9\\-\\.]*chrome\\.com/.*$': { id: "ie7b9ad91" },
-            '^www\\.rogers\\.com/web/Rogers\\.portal$': { id: "ic1b9f0f8" },
             '^[a-z0-9\\-\\.]*linkedin\\.com/.*$': { id: "i5c9f10bf" },
             '^[a-z0-9\\-\\.]*facebook\\.com/.*$': { id: "iee48a9a4" },
             '^[a-z0-9\\-\\.]*twitter\\.com/.*$': { id: "i1a845a6a" },
             '^[a-z0-9\\-\\.]*fbcdn\\.net/.*$': { id: "ib4575dbb" },
             '^[a-z0-9\\-\\.]*imgur\\.com/.*$': { id: "ib4575dbb" },
             '^webcache\\.googleusercontent\\.com/.*$': { id: "ib2890983" },
+            '^[a-z0-9\\-\\.]*reddit\\.com/.*$': { id: "i2ebf94ef" },
+            '^[a-z0-9\\-\\.]*instagram\\.com/.*$': { id: "ifa079487" },
+            '^[a-z0-9\\-\\.]*yahoo\\.(ca|com)/.*$': { id: "ib4d10a60" },
+            '^[a-z0-9\\-\\.]*echoes\\.im/.*$': { id: "ie6fffe6c" },
         },
         exclude: {
             // /blank.html causes issues with http://www.google.ca/imgres urls

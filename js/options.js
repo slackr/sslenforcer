@@ -239,46 +239,10 @@ function create_rule_record(div_id, rule, ruleobj) {
             .addClass('table')
             .addClass('padded')
             .addClass('highlight')
-
             .addClass('buttonize')
 
             .attr('id',ruleobj.id)
 
-            //.hover(
-            //    function() {
-            //        $(this)
-            //            .children('#hover_button_container')
-            //            .append(
-            //                $('<span>')
-            //                    .addClass('buttonize')
-            //                    .addClass('button_neutral')
-            //                    .addClass('padded')
-            //
-            //                    .text('Edit')
-            //
-            //                    .on('click', function() {
-            //                        edit_rule_entry($(this).closest('div').attr('id'));
-            //                    })
-            //                ,
-            //                $('<span>')
-            //                    .addClass('buttonize')
-            //                    .addClass('button_neutral')
-            //                    .addClass('padded')
-            //
-            //                    .text('Delete')
-            //                    .on('click', function() {
-            //                        if (confirm('Are you sure?')) {
-            //                            delete_rule_entry($(this).closest('div').attr('id'));
-            //                        }
-            //                    })
-            //            )
-            //    },
-            //    function() {
-            //        $(this)
-            //            .children('#hover_button_container')
-            //            .text('')
-            //    }
-            //)
             .append(
                 $('<label>')
                     .addClass('padded')
@@ -288,13 +252,7 @@ function create_rule_record(div_id, rule, ruleobj) {
                             .addClass('padded')
                             .text(rule)
                     )
-                //,
-                //$('<span>')
-                //    .addClass('padded')
-                //    .addClass('float_right')
-                //    .attr('id','hover_button_container')
             )
-
             .on('click', function() {
                 edit_rule_entry($(this).attr('id'));
             })
