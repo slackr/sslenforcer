@@ -49,9 +49,9 @@ var $options_defaults = {
 };
 
 /**
- * clone object, doesn't support object values.. (regex)
+ * defaults will be loaded by get_options()
  */
-var $options = JSON.parse(JSON.stringify($options_defaults));
+var $options = {};
 
 /**
  * engine config
@@ -190,8 +190,12 @@ chrome.runtime.onInstalled.addListener(function(details) {
 });
 
 chrome.runtime.onStartup.addListener(function() {
-    log("initializing extension...", 0, "startup");
+    log("initializing extension...", $options_defaults.log_level, "startup");
     get_options(null, true);
+});
+
+chrome.runtime.onSuspend.addListener(function() {
+    log("suspending extension...", $options_defaults.log_level, "suspend");
 });
 
 
@@ -208,23 +212,23 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
             });
             break;
 
-        case 'gimmie_options':
-            sendResponse({
-                data: $options
-            });
-            break;
-
-        case 'gimmie_config':
-            sendResponse({
-                data: $config
-            });
-            break;
-
         case 'gimmie_config_and_options':
-            sendResponse({
-                config: $config,
-                options: $options
-            });
+            //this happens on enable/disable of extension, no events are fired so $options is {}
+            if (Object.keys($options).length == 0) {
+                log("$options is empty, attempting to retrieve from storage...", 0, "options");
+                get_options(function() {
+                    sendResponse({
+                        config: $config,
+                        options: $options
+                    });
+                }, false);
+            } else {
+                log("$options found in memory, sending response...", 0, "options");
+                sendResponse({
+                    config: $config,
+                    options: $options
+                });
+            }
             break;
 
         case 'restore_default_options':
@@ -501,6 +505,13 @@ function init_tab(tid) {
  * options handlers
  */
 function get_options(callback, convert_legacy) {
+    if (Object.keys($options).length == 0) {
+        /**
+         * clone object, doesn't support object values.. (regex)
+         */
+        $options = JSON.parse(JSON.stringify($options_defaults));
+    }
+
     $storage.get("options", function(items) {
         if (typeof chrome.runtime.lastError != 'undefined') {
             log("error on storage.get: " + JSON.stringify(chrome.runtime.lastError), $options_defaults.log_level, "storage");

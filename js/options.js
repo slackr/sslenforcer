@@ -3,10 +3,10 @@ var $config = {};
 
 $(document).ready(function($) {
     chrome.extension.sendRequest({type: 'gimmie_config_and_options'}, function(ret) {
-        log("retrieved $options and $config from background.js", -2, "debug");
         $options = ret.options;
         $config = ret.config;
 
+        log("retrieved $options and $config from background.js", -2, "debug");
         initialize_page();
     });
 });
@@ -115,6 +115,7 @@ function populate_options() {
             }
 
             var save_id = $('#rule_id').val();
+            var original_id = save_id; // on save we generate a new id, and we need this to remove old element
             if (save_id == "") {
                 if (typeof $options.ssle[save_type][save_pattern] != 'undefined') {
                     $('#rule_pattern').addClass("ui_value_error").focus();
@@ -123,6 +124,8 @@ function populate_options() {
                     return false;
                 }
 
+                save_id = uniq_id();
+            } else if (select_record_by_id(save_id)) {
                 save_id = uniq_id();
             }
 
@@ -143,7 +146,7 @@ function populate_options() {
                     chrome.extension.sendRequest({type: 'save_options'}, function(data) {
                         options_saved(data);
 
-                        $('#' + save_id).remove();
+                        $('#' + original_id).remove();
                         create_rule_record('#folder_' + save_type, save_pattern, { id: save_id });
                         $('#' + save_id).hide();
                         $('#' + save_id).addClass('message');
