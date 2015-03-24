@@ -283,6 +283,10 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
                 delete_record_by_id(req.value.id);
             }
 
+            if (req.value.old_id) {
+                delete_record_by_id(req.value.old_id);
+            }
+
             $options.ssle[req.rule_type][req.rule_pattern] = req.value;
 
             sendResponse({

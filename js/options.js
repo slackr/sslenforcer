@@ -115,7 +115,7 @@ function populate_options() {
             }
 
             var save_id = $('#rule_id').val();
-            var original_id = save_id; // on save we generate a new id, and we need this to remove old element
+            var old_id = save_id; // on save we generate a new id, and we need this to remove old element
             if (save_id == "") {
                 if (typeof $options.ssle[save_type][save_pattern] != 'undefined') {
                     $('#rule_pattern').addClass("ui_value_error").focus();
@@ -138,7 +138,8 @@ function populate_options() {
                     rule_type: save_type,
                     rule_pattern: save_pattern,
                     value: {
-                        id: save_id
+                        id: save_id,
+                        old_id: old_id,
                     }
                 }, function (data) {
                     message_received(data);
@@ -146,7 +147,7 @@ function populate_options() {
                     chrome.extension.sendRequest({type: 'save_options'}, function(data) {
                         options_saved(data);
 
-                        $('#' + original_id).remove();
+                        $('#' + old_id).remove();
                         create_rule_record('#folder_' + save_type, save_pattern, { id: save_id });
                         $('#' + save_id).hide();
                         $('#' + save_id).addClass('message');
