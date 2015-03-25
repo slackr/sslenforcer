@@ -107,7 +107,7 @@ function populate_options() {
             var save_pattern = $('#rule_pattern').val();
 
             if (typeof save_pattern == 'undefined'
-                || save_pattern == "") {
+                || save_pattern === '') {
                 $('#rule_pattern').addClass("ui_value_error").focus();
                 alert("Invalid regex pattern (cannot be blank)");
                 setTimeout(function() { $('#rule_pattern').removeClass('ui_value_error'); }, 700);
@@ -116,7 +116,7 @@ function populate_options() {
 
             var save_id = $('#rule_id').val();
             var old_id = save_id; // on save we generate a new id, and we need this to remove old element
-            if (save_id == "") {
+            if (save_id === '') {
                 if (typeof $options.ssle[save_type][save_pattern] != 'undefined') {
                     $('#rule_pattern').addClass("ui_value_error").focus();
                     alert("A rule for '" + save_pattern + "' already exists in the '" + save_type + "' ruleset.");
@@ -247,7 +247,7 @@ function populate_options() {
 
 function populate_rules(div_id, rules) {
     for (var rule in rules) {
-        create_rule_record(div_id, rule, rules[rule])
+        create_rule_record(div_id, rule, rules[rule]);
     }
 }
 
@@ -286,13 +286,13 @@ function write_info(text) {
 }
 
 function ui_attach_checkbox(obj, settings) {
-    var check_text = settings.check_text != undefined ? settings.check_text : '\u2714'; // checkmark
-    var uncheck_text = settings.uncheck_text != undefined ? settings.uncheck_text : '\u2006'; // blank
+    var check_text = typeof settings.check_text !== 'undefined' ? settings.check_text : '\u2714'; // checkmark
+    var uncheck_text = typeof settings.uncheck_text !== 'undefined' ? settings.uncheck_text : '\u2006'; // blank
 
     obj.before(
         $('<span>')
             .attr('id',obj.attr('id') + '_ui_checkbox')
-            .attr('title',settings.title != undefined ? settings.title : "")
+            .attr('title', (typeof settings.title != 'undefined' ? settings.title : ''))
             .addClass('buttonize')
             .addClass('button_neutral')
             .addClass('padded')
@@ -303,7 +303,7 @@ function ui_attach_checkbox(obj, settings) {
             .on("click", function() {
                 $(this).text($(this).text() == check_text ? uncheck_text : check_text);
                 $(this).data("is_checked", ($(this).text() == check_text ? 1 : 0));
-                if (settings.callback != undefined) {
+                if (typeof settings.callback == 'function') {
                     settings.callback();
                 }
             })
@@ -311,13 +311,13 @@ function ui_attach_checkbox(obj, settings) {
 }
 
 function ui_attach_value_changer(obj, settings) {
-    var up_text = settings.up_text != undefined ? settings.up_text : '+'; //'\u039B';
-    var down_text = settings.down_text != undefined ? settings.down_text : '-'; //'V';
+    var up_text = typeof settings.up_text != 'undefined' ? settings.up_text : '+'; //'\u039B';
+    var down_text = typeof settings.down_text != 'undefined' ? settings.down_text : '-'; //'V';
 
     obj.after(
         $('<span>')
             .attr('id',obj.attr('id') + '_ui_value_down')
-            .attr('title',settings.title != undefined ? settings.title : "")
+            .attr('title', (typeof settings.title != 'undefined' ? settings.title : ''))
             .addClass('buttonize')
             .addClass('button_neutral')
             .addClass('padded')
@@ -327,20 +327,20 @@ function ui_attach_value_changer(obj, settings) {
                 var value = parseInt(obj.text());
                 if (value > settings.lowest) {
                     obj.text(value - settings.inc_value);
-                    if (settings.callback != undefined) {
+                    if (typeof settings.callback == 'function') {
                         settings.callback();
                     }
                 } else {
-                    obj.addClass('ui_value_error')
+                    obj.addClass('ui_value_error');
                     setTimeout(function() {
-                        obj.removeClass('ui_value_error')
+                        obj.removeClass('ui_value_error');
                     }, 500);
                 }
             })
         , // ).before(
         $('<span>')
             .attr('id',obj.attr('id') + '_ui_value_up')
-            .attr('title',settings.title != undefined ? settings.title : "")
+            .attr('title', (typeof settings.title != 'undefined' ? settings.title : ''))
             .addClass('buttonize')
             .addClass('button_neutral')
             .addClass('padded')
@@ -350,13 +350,13 @@ function ui_attach_value_changer(obj, settings) {
                 var value = parseInt(obj.text());
                 if (value < settings.highest) {
                     obj.text(value + settings.inc_value);
-                    if (settings.callback != undefined) {
+                    if (typeof settings.callback == 'function') {
                         settings.callback();
                     }
                 } else {
-                    obj.addClass('option_value_error')
+                    obj.addClass('option_value_error');
                     setTimeout(function() {
-                        obj.removeClass('option_value_error')
+                        obj.removeClass('option_value_error');
                     }, 500);
                 }
             })
@@ -423,14 +423,14 @@ function export_options() {
 function cleanup_imported_options(data) {
     var json = null;
     try {
-        json = JSON.parse(data)
+        json = JSON.parse(data);
     } catch (e) {
         alert('File import failed: ' + e);
         return false;
     }
     if (typeof json == 'object') {
         for (var key in json) { // sanity check
-            if (typeof $options[key] == undefined) {
+            if (typeof $options[key] == 'undefined') {
                 delete json[key];
             }
         }
@@ -469,7 +469,7 @@ function import_options() {
                     window.location.reload();
                 });
             }
-        }
+        };
     })(files[0]); // files[0] assumes only one file has been selected
 
     return read.readAsText(files[0]);

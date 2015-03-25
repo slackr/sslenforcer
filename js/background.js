@@ -33,7 +33,7 @@ var $options_defaults = {
             '^[a-z0-9\\-\\.]*facebook\\.com/.*$': { id: "iee48a9a4" },
             '^[a-z0-9\\-\\.]*twitter\\.com/.*$': { id: "i1a845a6a" },
             '^[a-z0-9\\-\\.]*fbcdn\\.net/.*$': { id: "ib4575dbb" },
-            '^[a-z0-9\\-\\.]*imgur\\.com/.*$': { id: "ib4575dbb" },
+            '^[a-z0-9\\-\\.]*imgur\\.com/.*$': { id: "i9ad4b56e" },
             '^webcache\\.googleusercontent\\.com/.*$': { id: "ib2890983" },
             '^[a-z0-9\\-\\.]*reddit\\.com/.*$': { id: "i2ebf94ef" },
             '^[a-z0-9\\-\\.]*instagram\\.com/.*$': { id: "ifa079487" },
@@ -95,7 +95,7 @@ var $config = {
         "1": "Rule matched for enforcement",
         "2": "URL was accessed via HTTPS",
     },
-}
+};
 
 // http redirect loop protection
 var $flood = {};
@@ -106,7 +106,7 @@ var $tab_status = {
 
 var $timeouts = {
     save_options: null
-}
+};
 
 /**
  * webRequest listeners
@@ -127,7 +127,7 @@ chrome.webRequest.onCompleted.addListener(function(data) {
         log("onCompleted: " + JSON.stringify(data), -2, "debug");
 
         if ($options.ssle_enabled == 1
-            && $tab_status[tid] != undefined) {
+            && typeof $tab_status[tid] != 'undefined') {
             for (var state in $tab_status[tid]) {
                 if (Object.keys($tab_status[tid][state]).length > 0
                     && $config.states[state].weight >= current_weight) {
@@ -138,7 +138,7 @@ chrome.webRequest.onCompleted.addListener(function(data) {
 
             if (Object.keys($tab_status[tid].enforced).length > 0
                 && Object.keys($tab_status[tid].disabled).length > 0
-                && Object.keys($tab_status[tid].error).length == 0) {
+                && Object.keys($tab_status[tid].error).length === 0) {
 
                 current_state = "warning";
             }
@@ -214,7 +214,7 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
 
         case 'gimmie_config_and_options':
             //this happens on enable/disable of extension, no events are fired so $options is {}
-            if (Object.keys($options).length == 0) {
+            if (Object.keys($options).length === 0) {
                 log("$options is empty, attempting to retrieve from storage...", 0, "options");
                 get_options(function() {
                     sendResponse({
@@ -245,7 +245,7 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
                 sendResponse({
                    message: "synced with default ruleset",
                    options: $options
-                })
+                });
             });
             break;
 
@@ -255,16 +255,18 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
                 sendResponse({
                    message: "options saved",
                    options: $options
-                })
+                });
             });
             break;
         case 'import_options':
-            $options = req.options;
+            for (var ikey in req.options) {
+                $options[ikey] = req.options[ikey];
+            }
 
             save_options(function() {
                 sendResponse({
                    message: "options imported"
-                })
+                });
             });
             break;
 
@@ -277,7 +279,7 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
             break;
 
         case 'set_rule':
-            if (req.value.id == "") {
+            if (req.value.id === '') {
                 req.value.id = uniq_id();
             } else { //cleanup existing rule before an edit
                 delete_record_by_id(req.value.id);
@@ -325,7 +327,7 @@ function se(data) {
 
     var fqdn = url.url_parse("fqdn");
     var uri = url.url_parse("uri");
-    var secure_url = "https://" + fqdn + uri
+    var secure_url = "https://" + fqdn + uri;
 
     var enforcement = 0;
     var status_msg = "";
@@ -333,7 +335,7 @@ function se(data) {
     log("get " + type + " (by tab: " + tid + ") - fqdn: " + fqdn + ", uri: " + uri, -2, "nav");
 
     // check if our tab has initialized properly
-    if ($tab_status[tid] == undefined) {
+    if (typeof $tab_status[tid] == 'undefined') {
         init_tab(tid);
     }
 
@@ -344,26 +346,26 @@ function se(data) {
         init_tab(tid);
     }
 
-    for (var pattern in $options.ssle.exclude) {
-        var rtest = new RegExp(pattern, $options.regex_flags);
-        if (rtest.test(fqdn + uri)) {
-            status_msg = "exclusion rule matched for '" + fqdn + "' (" + pattern + ")";
+    for (var pattern_ex in $options.ssle.exclude) {
+        var rtest_ex = new RegExp(pattern_ex, $options.regex_flags);
+        if (rtest_ex.test(fqdn + uri)) {
+            status_msg = "exclusion rule matched for '" + fqdn + "' (" + pattern_ex + ")";
             push_tab_status("warning", tid, -1, {
                 url: fqdn + uri,
-                pattern: pattern
+                pattern: pattern_ex
             });
 
             log(status_msg, 1, "enforce");
             return { cancel: false };
         }
     }
-    for (var pattern in $options.ssle.enforce) {
-        var rtest = new RegExp(pattern, $options.regex_flags);
-        if (rtest.test(fqdn + uri)) {
-            status_msg = "rule matched for '" + fqdn + "' (" + pattern + "), rewriting request to: " + secure_url;
+    for (var pattern_en in $options.ssle.enforce) {
+        var rtest_en = new RegExp(pattern_en, $options.regex_flags);
+        if (rtest_en.test(fqdn + uri)) {
+            status_msg = "rule matched for '" + fqdn + "' (" + pattern_en + "), rewriting request to: " + secure_url;
             push_tab_status("enforced", tid, 1, {
                 url: fqdn + uri,
-                pattern: pattern
+                pattern: pattern_en
             });
 
             log(status_msg, 1, "enforce");
@@ -509,7 +511,7 @@ function init_tab(tid) {
  * options handlers
  */
 function get_options(callback, convert_legacy) {
-    if (Object.keys($options).length == 0) {
+    if (Object.keys($options).length === 0) {
         /**
          * clone object, doesn't support object values.. (regex)
          */
@@ -538,8 +540,9 @@ function get_options(callback, convert_legacy) {
             log("options retrieved from storage (" + STORAGE_TYPE + ")", 0, "storage");
         }
 
-        if (callback != undefined)
+        if (typeof callback == 'function') {
             callback(items);
+        }
     });
 }
 
@@ -549,8 +552,9 @@ function save_options(callback) {
         $storage.set({options: $options}, function() {
             log("options saved to storage (" + STORAGE_TYPE + ")", 0, "storage");
 
-            if (callback != undefined)
+            if (typeof callback == 'function'){
                 callback();
+            }
         });
     }, $config.save_options_delay);
     log("options save action delayed by " + $config.save_options_delay + "ms to avoid flooding storage", -2, "debug");
@@ -564,18 +568,18 @@ function convert_legacy_ruleset(ruleset) {
                 var rule_fix = "^[a-z0-9\\-\\.]*" + rule.substr(5);
                 ruleset[type][rule_fix] = { id: ruleset[type][rule].id };
                 delete ruleset[type][rule];
-                log("rule fix '" + rule + "' -> '" + rule_fix + "' = '" + JSON.stringify(ruleset[type][rule_fix]) + "'",  $options_defaults.log_level, "legacy")
+                log("rule fix '" + rule + "' -> '" + rule_fix + "' = '" + JSON.stringify(ruleset[type][rule_fix]) + "'",  $options_defaults.log_level, "legacy");
             }
             if (typeof ruleset[type][rule].subdomains != 'undefined') {
                 var regex_rule = rule.escape_regex();
 
                 regex_rule = ((ruleset[type][rule].subdomains == 1) ? "^[a-z0-9\\-\\.]*" : "^") + regex_rule;
-                regex_rule = regex_rule + ((ruleset[type][rule].uri != "") ? ruleset[type][rule].uri.escape_regex() + "$" : "/.*$");
+                regex_rule = regex_rule + ((ruleset[type][rule].uri !== '') ? ruleset[type][rule].uri.escape_regex() + "$" : "/.*$");
 
                 ruleset[type][regex_rule] = { id: ruleset[type][rule].id };
                 delete ruleset[type][rule];
 
-                log("converted legacy rule '" + rule + "' -> '" + regex_rule + "' = '" + JSON.stringify(ruleset[type][regex_rule]) + "'",  $options_defaults.log_level, "legacy")
+                log("converted legacy rule '" + rule + "' -> '" + regex_rule + "' = '" + JSON.stringify(ruleset[type][regex_rule]) + "'",  $options_defaults.log_level, "legacy");
             }
         }
     }

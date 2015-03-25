@@ -25,8 +25,8 @@ function delete_record_by_id(id) {
  * utils
  */
 function log(msg, level, zone) {
-    level = (level != null ? level : 0);
-    zone = (zone != null ? zone : "info");
+    level = (level !== null ? level : 0);
+    zone = (zone !== null ? zone : "info");
 
     if (level >= $options.log_level) {
         chrome.runtime.getBackgroundPage(function(bg) {
@@ -60,12 +60,12 @@ function update_badge_text() {
  */
 function prioritize_states() {
     var stateSortArr = [];
-    for (stateName in $config.states) {
+    for (var stateName in $config.states) {
         stateSortArr.push({ name: stateName, weight: $config.states[stateName].weight });
     }
 
-    stateSortArr.sort(function(a, b) { return b.weight - a.weight }); //b - a for descending sort
-    return stateSortArr.map(function(state) { return state.name });
+    stateSortArr.sort(function(a, b) { return b.weight - a.weight; }); //b - a for descending sort
+    return stateSortArr.map(function(state) { return state.name; });
 }
 
 function toggle_ssle() {
@@ -119,7 +119,7 @@ Array.prototype.contains = function(what) {
         }
     }
     return false;
-}
+};
 
 /**
  * returns 'what' part of the url
@@ -127,20 +127,16 @@ Array.prototype.contains = function(what) {
 String.prototype.url_parse = function(what) {
     switch (what) {
         case "uri":
-            return this.match(/^(http[s]?:\/\/)?[\w\.\-]+(\/.*)$/im)[2] || "";
-            break;
+            return this.match(/^(http[s]?:\/\/)?[\w\.\-]+(\/.*)$/im)[2] || '';
 
         case "fqdn":
-            return this.match(/^(http[s]?:\/\/)?([\w\.\-]+)\/.*$/im)[2] || "";
-            break;
+            return this.match(/^(http[s]?:\/\/)?([\w\.\-]+)\/.*$/im)[2] || '';
 
         case "protocol":
-            return this.match(/^([\w]+):\/\//im)[1] || "";
-            break;
+            return this.match(/^([\w]+):\/\//im)[1] || '';
 
         case "domain":
-            return this.split(".").slice(-2).join(".") || "";
-            break;
+            return this.split(".").slice(-2).join(".") || '';
 
         case "subdomains":
             var subs = this.split(".");
@@ -148,29 +144,29 @@ String.prototype.url_parse = function(what) {
             return subs || [];
 
         default:
-            break;
+        break;
     }
     return null;
-}
+};
 
 /**
  * shorten a string and append ... to the end
  * no dots are added if second param is true
  */
 String.prototype.limit = function(limit, no_dots) {
-    return this.substr(0,limit) + (no_dots || this.length <= limit ? "" : "...");
-}
+    return this.substr(0,limit) + (no_dots || this.length <= limit ? '' : '...');
+};
 
 /**
  * returns true if string starts with https://
  */
 String.prototype.is_https = function() {
     return (this.substr(0,8) == "https://" ? true : false);
-}
+};
 
 /**
  * escape regex special chars, stolen from mozilla
  */
 String.prototype.escape_regex = function() {
     return this.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-}
+};

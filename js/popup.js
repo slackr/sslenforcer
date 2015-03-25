@@ -103,7 +103,7 @@ function draw_state(state, state_data) {
             var uri = url.url_parse("uri");
             var domain = fqdn.url_parse("domain");
             
-            log("popup, processing url: " + fullurl, -2, "debug")
+            log("popup, processing url: " + fullurl, -2, "debug");
 
             var domain_div_id = 'state_' + state + '_' + reason + '_' + domain;
 
