@@ -1,12 +1,14 @@
 var $options = {};
 var $config = {};
 
+var $o = new SknObject('options');
+
 $(document).ready(function($) {
     chrome.extension.sendRequest({type: 'gimmie_config_and_options'}, function(ret) {
         $options = ret.options;
         $config = ret.config;
 
-        log("retrieved $options and $config from background.js", -2, "debug");
+        $o.log("retrieved $options and $config from background.js", 0, 'init');
         initialize_page();
     });
 });
@@ -84,6 +86,8 @@ function populate_options() {
                     .text('Syncing Ruleset...');
 
                 chrome.extension.sendRequest({type: 'sync_with_default_ruleset'}, function(data) {
+                    $o.message_received(data);
+                    $o.log('sync was successful, reloading page...', 1, 'sync');
                     window.location.reload();
                 });
             }
@@ -142,7 +146,7 @@ function populate_options() {
                         old_id: old_id,
                     }
                 }, function (data) {
-                    message_received(data);
+                    $o.message_received(data);
 
                     chrome.extension.sendRequest({type: 'save_options'}, function(data) {
                         options_saved(data);
@@ -198,7 +202,7 @@ function populate_options() {
             chrome.extension.sendRequest({type: 'set_option', key: 'flood', value: {
                 hits: parseInt($('#option_value_flood_hits').text()),
                 ms: parseInt($('#option_value_flood_ms').text())
-            }}, message_received);
+            }}, $o.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
@@ -207,26 +211,26 @@ function populate_options() {
             chrome.extension.sendRequest({type: 'set_option', key: 'flood', value: {
                 hits: parseInt($('#option_value_flood_hits').text()),
                 ms: parseInt($('#option_value_flood_ms').text())
-            }}, message_received);
+            }}, $o.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
-    ui_attach_value_changer($('#option_value_log_level'), { title: "Low logging levels may have a negative impact on browser performance!", inc_value: 1, lowest: -2, highest: 3,
+    ui_attach_value_changer($('#option_value_log_level'), { title: "Low logging levels may have a negative impact on browser performance!", inc_value: 1, lowest: 0, highest: 3,
         callback: function() {
-            chrome.extension.sendRequest({type: 'set_option', key: 'log_level', value: parseInt($('#option_value_log_level').text())}, message_received);
+            chrome.extension.sendRequest({type: 'set_option', key: 'log_level', value: parseInt($('#option_value_log_level').text())}, $o.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
     ui_attach_value_changer($('#option_value_max_tab_status'), { title: "Higher limits may have a negative impact on browser performance!", inc_value: 10, lowest: 10, highest: 1000,
         callback: function() {
-            chrome.extension.sendRequest({type: 'set_option', key: 'max_tab_status', value: parseInt($('#option_value_max_tab_status').text())}, message_received);
+            chrome.extension.sendRequest({type: 'set_option', key: 'max_tab_status', value: parseInt($('#option_value_max_tab_status').text())}, $o.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
 
     ui_attach_checkbox($('#option_verbose_tab'), { on: $options.verbose_tab,
         callback: function() {
-            chrome.extension.sendRequest({type: 'set_option', key: 'verbose_tab', value: $('#option_verbose_tab_ui_checkbox').data('is_checked') }, message_received);
+            chrome.extension.sendRequest({type: 'set_option', key: 'verbose_tab', value: $('#option_verbose_tab_ui_checkbox').data('is_checked') }, $o.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
@@ -238,7 +242,7 @@ function populate_options() {
                 for (var val in $config.allowed_regex_flags) {
                     regex_flags_value += ($('#option_regex_flags_' + val + '_ui_checkbox').data('is_checked') == 1 ? val : '');
                 }
-                chrome.extension.sendRequest({type: 'set_option', key: 'regex_flags', value: regex_flags_value }, message_received);
+                chrome.extension.sendRequest({type: 'set_option', key: 'regex_flags', value: regex_flags_value }, $o.message_received);
                 chrome.extension.sendRequest({type: 'save_options'}, options_saved);
             }
         });
@@ -370,11 +374,11 @@ function delete_rule_entry(delete_id) {
             .addClass('warning')
             .fadeOut('fast');
 
-        log("rule type '" + record.type + "' with id '" + delete_id + "' was deleted", -1, "opt");
-        chrome.extension.sendRequest({type: 'delete_rule', id: delete_id, rule_type: record.type, rule_entry: record.entry}, message_received);
+        $o.log("rule type '" + record.type + "' with id '" + delete_id + "' was deleted", 1, 'rule');
+        chrome.extension.sendRequest({type: 'delete_rule', id: delete_id, rule_type: record.type, rule_entry: record.entry}, $o.message_received);
         chrome.extension.sendRequest({type: 'save_options'}, options_saved);
     } else {
-        log("rule with id '" + delete_id + "' not found for deletion", 2, "rule");
+        $o.log("rule with id '" + delete_id + "' not found for deletion", 3, 'rule');
     }
 }
 
@@ -393,16 +397,16 @@ function edit_rule_entry(edit_id) {
         show_popup('#popup_rule');
         $('#rule_pattern').focus();
     } else {
-        log("rule with id '" + edit_id + "' not found for edit", 2, "rule");
+        $o.log("rule with id '" + edit_id + "' not found for edit", 3, 'rule');
     }
 }
 
 function options_saved(data) {
     if (typeof data.options != 'undefined') {
-        log("options data returned with 'save_options' confirmation message", -1, "opt");
+        $o.log("options data returned with 'save_options' confirmation message", 1, 'options');
         $options = data.options;
     }
-    message_received(data);
+    $o.message_received(data);
 
     write_info("Options successfully saved to storage!");
 }
@@ -418,6 +422,8 @@ function export_options() {
     );
     $('#export_options')[0].click();
     $('#export_options').remove();
+
+    $o.log('options exported to: ' + filename, 1, 'export');
 }
 
 function cleanup_imported_options(data) {
@@ -425,7 +431,8 @@ function cleanup_imported_options(data) {
     try {
         json = JSON.parse(data);
     } catch (e) {
-        alert('File import failed: ' + e);
+        $o.log("json parse failed on imported data: " + e, 3, 'import');
+        alert('File import failed (JSON formatting error): ' + e);
         return false;
     }
     if (typeof json == 'object') {
@@ -435,7 +442,8 @@ function cleanup_imported_options(data) {
             }
         }
     }
-    log("import options cleanup: " + JSON.stringify(json), -2, "import");
+
+    $o.log("import options cleanup: " + JSON.stringify(json), 0, 'import');
     return json;
 }
 
@@ -447,11 +455,13 @@ function import_options() {
 
     if (!(files instanceof FileList) || files.length === 0){
         alert('Please select an options file to import (JSON format)');
+        $o.log("import failed, no file selected", 3, 'import');
         return false;
     }
 
     if (files[0].size > $config.max_import_filesize) {
         alert('Options file too large. Limit: ' + ($config.max_import_filesize / 1024).toFixed(0) + 'KB');
+        $o.log("import failed, file too large: " + files[0].size, 3, 'import');
         return false;
     }
 
@@ -462,10 +472,11 @@ function import_options() {
         return function(e) {
             // import_options() will do a sanity check before writing to memory
             var clean_options = cleanup_imported_options(e.target.result);
-            if (clean_options) { // e.target.result is the content
+            if (clean_options) {
                 $('#import_options').text('Importing...');
                 chrome.extension.sendRequest({type: 'import_options', options: clean_options}, function(data) {
-                    message_received(data);
+                    $o.message_received(data);
+                    $o.log("import successful, reloading page...", 1, 'import');
                     window.location.reload();
                 });
             }

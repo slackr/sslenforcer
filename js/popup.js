@@ -1,43 +1,46 @@
 var $options = {};
 var $config = {};
 
+var $p = new SknObject('popup');
+
 $(document).ready(function($) {
     chrome.extension.sendRequest({type: 'gimmie_config_and_options'}, function(ret) {
-        log("retrieved $options and $config from background.js", -2, "debug");
         $options = ret.options;
         $config = ret.config;
-        
+
+        $p.log("retrieved $options and $config from background.js", 0, 'init');
         initialize_page();
     });
-    
+
 
 });
 
 function initialize_page() {
     var ext_name = chrome.app.getDetails().name;
     var ext_version = chrome.app.getDetails().version;
-    
+
     $('#ext_name').text(ext_name);
     $('#ext_version').text(ext_version);
-        
+
     $('#ext_state')
         .addClass($options.ssle_enabled ? "button_on" : "button_off")
-        
+
         .text($options.ssle_enabled ? "Enabled" : "Disabled")
         .on("click", toggle_ssle);
 
-    $('#ext_options')        
+    $('#ext_options')
         .text("Options")
         .on("click", function() {
             chrome.tabs.create({'url': chrome.extension.getURL('html/options.html')});
         });
-        
+
     document.title = ext_name + " (" + ext_version + ") Popup";
-    
+
     chrome.windows.getCurrent(function(w) {
         chrome.tabs.query({windowId: w.id, highlighted: true}, function(t) {
             var current_tid = t[0].id; // there should only be one highlighted tab in the current window.
 
+            $p.log("fetching tab status for tab with id: " + current_tid, 1, 'tab');
             chrome.extension.sendRequest({
                     type: 'gimmie_status',
                     tid: current_tid
@@ -52,16 +55,17 @@ function write_tab_status(ts) {
     var data = ts.data;
     var priority_states = prioritize_states(); // array of states, prioritized by weight
 
-    log("gimmie_status: " + JSON.stringify(data), -2, "debug");
+    $p.log("gimmie_status: " + JSON.stringify(data), 0, 'tab');
 
     for (var s = 0; s < priority_states.length; s++) {
         var state = priority_states[s];
         var state_data = data[state];
-        
+
         if (Object.keys(state_data).length > 0) {
+            $p.log("writing tab status for state: " + state, 1, 'tab');
             draw_state(state, state_data);
         } else {
-            log("no urls for state: " + state, -1, "popup");
+            $p.log("no urls for state: " + state, 2, 'tab');
         }
     }
 }
@@ -91,8 +95,8 @@ function draw_state(state, state_data) {
                     .addClass('hidden')
             )
             .children(':last');
-        
-        log(state + " state url count: " + urls.length, -2, "debug");
+
+        $p.log(state + " state url count: " + urls.length, 0, 'state');
         for (var u = 0; u < urls.length; u++) {
             var fullurl = urls[u].url;
             var url = fullurl.limit(75);
@@ -102,8 +106,8 @@ function draw_state(state, state_data) {
             var fqdn = url.url_parse("fqdn");
             var uri = url.url_parse("uri");
             var domain = fqdn.url_parse("domain");
-            
-            log("popup, processing url: " + fullurl, -2, "debug");
+
+            $p.log("processing url: " + fullurl, 0, 'state');
 
             var domain_div_id = 'state_' + state + '_' + reason + '_' + domain;
 
@@ -117,13 +121,13 @@ function draw_state(state, state_data) {
                                 .addClass('domain')
                                 .addClass('buttonize')
                                 .text(domain)
-            
+
                                 .on("click", function() {
                                     $(this).next('div').toggle('fast');
                                 })
                         )
                         .children(':last');
-            
+
             var domain_folder_div =
                 $('div [id="folder_' + domain_div_id + '"]').is('div')
                     ? $('div [id="folder_' + domain_div_id + '"]')
@@ -135,7 +139,7 @@ function draw_state(state, state_data) {
                                 .addClass('hidden')
                         )
                         .children(':last');
-                        
+
             domain_folder_div
                 .append(
                     $('<div>')
@@ -154,4 +158,16 @@ function draw_state(state, state_data) {
                 );
         }
     }
+}
+
+function toggle_ssle() {
+    $options.ssle_enabled = ($options.ssle_enabled ? 0 : 1);
+    $('#ext_state')
+        .addClass($options.ssle_enabled ? "button_on" : "button_off")
+        .removeClass(!$options.ssle_enabled ? "button_on" : "button_off")
+        .text($options.ssle_enabled ? "Enabled" : "Disabled");
+
+    chrome.extension.sendRequest({type: 'set_option', key: 'ssle_enabled', value: $options.ssle_enabled}, function() {
+        chrome.extension.sendRequest({type: 'save_options'}, $p.message_received);
+    });
 }

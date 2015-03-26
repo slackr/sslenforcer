@@ -1,3 +1,5 @@
+var $c = SknObject('common');
+
 /**
  * rule db
  */
@@ -35,26 +37,6 @@ function log(msg, level, zone) {
     }
 }
 
-function set_icon(icon, tid) {
-    if (tid != -1) {
-        chrome.browserAction.setIcon({
-            path: $config.icons[icon],
-            tabId: tid
-        });
-
-        log("icon set to '" + icon + "' on tab: " + tid, -2, "debug");
-    } else {
-        log("icon not set for tab: " + tid, -2, "debug");
-    }
-
-}
-
-function update_badge_text() {
-    chrome.browserAction.setBadgeText({
-        "text" : ($options.ssle_enabled ? "" : "x")
-    });
-}
-
 /**
  * return array of states sorted by descending weight
  */
@@ -66,23 +48,6 @@ function prioritize_states() {
 
     stateSortArr.sort(function(a, b) { return b.weight - a.weight; }); //b - a for descending sort
     return stateSortArr.map(function(state) { return state.name; });
-}
-
-function toggle_ssle() {
-    $options.ssle_enabled = ($options.ssle_enabled ? 0 : 1);
-    $('#ext_state')
-        .addClass($options.ssle_enabled ? "button_on" : "button_off")
-        .removeClass(!$options.ssle_enabled ? "button_on" : "button_off")
-        .text($options.ssle_enabled ? "Enabled" : "Disabled");
-
-    chrome.extension.sendRequest({type: 'set_option', key: 'ssle_enabled', value: $options.ssle_enabled}, message_received);
-    chrome.extension.sendRequest({type: 'save_options'}, message_received);
-
-    update_badge_text();
-}
-
-function message_received(ret) {
-    log("received response from background.js: '" + ret.message + "'", 0, "msg");
 }
 
 function uniq_id() {

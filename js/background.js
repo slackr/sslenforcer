@@ -7,15 +7,20 @@
  *      webRequest - access to chrome.webRequest.*
  *      webRequestBlocking - control web requests before they happen
  */
-const STORAGE_TYPE = 'sync'; // 'sync' or 'local'
-var $storage = (STORAGE_TYPE == 'sync' ? chrome.storage.sync : chrome.storage.local);
+
+/**
+ * Which storage object to bind to
+ *
+ * @see AppConfig#STORAGE_TYPE
+ */
+var $storage = (AppConfig.STORAGE_TYPE == 'sync' ? chrome.storage.sync : chrome.storage.local);
 
 /**
  * user config hard defaults
  */
 var $options_defaults = {
     ssle_enabled: 1,
-    log_level: 2,
+    log_level: 3,
     verbose_tab: 0,
     regex_flags: "ig",
     flood: {
@@ -89,7 +94,7 @@ var $config = {
         error: { weight: 30 },
     },
     state_reason: {
-        "-2": "Not enforced due to flooding",
+        "0,": "Not enforced due to flooding",
         "-1": "Enforcement explicitly disabled",
         "0": "No rules matched",
         "1": "Rule matched for enforcement",
@@ -108,6 +113,8 @@ var $timeouts = {
     save_options: null
 };
 
+var $bg = new SknObject('bg');
+
 /**
  * webRequest listeners
  */
@@ -124,7 +131,7 @@ chrome.webRequest.onCompleted.addListener(function(data) {
         var current_weight = 0;
         var tid = data.tabId;
 
-        log("onCompleted: " + JSON.stringify(data), -2, "debug");
+        $bg.log("onCompleted: " + JSON.stringify(data), 0, "debug");
 
         if ($options.ssle_enabled == 1
             && typeof $tab_status[tid] != 'undefined') {
@@ -150,7 +157,7 @@ chrome.webRequest.onCompleted.addListener(function(data) {
 );
 
 chrome.webRequest.onBeforeRedirect.addListener(function(data) {
-        log("onBeforeRedirect: " + JSON.stringify(data), -2, "debug");
+        $bg.log("onBeforeRedirect: " + JSON.stringify(data), 0, "debug");
     },
     $config.filters
 );
@@ -159,12 +166,12 @@ chrome.webRequest.onBeforeRedirect.addListener(function(data) {
  * tab event handlers
  */
 chrome.tabs.onCreated.addListener(function(tab){
-    log("tab " + tab.id + " was created...", -1, "tabs");
+    $bg.log("tab " + tab.id + " was created...", 0, "tabs");
     init_tab(tab.id);
 });
 
 chrome.tabs.onRemoved.addListener(function(tid){
-    log("tab " + tid + " was removed...", -1, "tabs");
+    $bg.log("tab " + tid + " was removed...", 0, "tabs");
     uninit_tab(tid);
 });
 
@@ -176,13 +183,13 @@ chrome.tabs.onRemoved.addListener(function(tid){
 chrome.runtime.onInstalled.addListener(function(details) {
     switch (details.reason) {
         case "install":
-            log("initializing extension...", $options_defaults.log_level, "install"); // use $options_defaults.log_level as level to make sure log is shown
+            $bg.log("initializing extension...", 1, "install"); // use $options_defaults.log_level as level to make sure log is shown
             save_options(); // write hard defaults
             break;
         case "update":
             var pv = details.previousVersion;
 
-            log("initializing extension... (previous version: " + pv + ")", $options_defaults.log_level, "update");
+            $bg.log("initializing extension... (previous version: " + pv + ")", 1, "update");
             get_options(null, (version_compare('1.0.2', pv) >= 0 ? true : false));
             break;
 
@@ -190,12 +197,12 @@ chrome.runtime.onInstalled.addListener(function(details) {
 });
 
 chrome.runtime.onStartup.addListener(function() {
-    log("initializing extension...", $options_defaults.log_level, "startup");
+    $bg.log("initializing extension...", 1, "startup");
     get_options(null, true);
 });
 
 chrome.runtime.onSuspend.addListener(function() {
-    log("suspending extension...", $options_defaults.log_level, "suspend");
+    $bg.log("suspending extension...", 1, "suspend");
 });
 
 
@@ -203,7 +210,7 @@ chrome.runtime.onSuspend.addListener(function() {
  * messaging
  */
 chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
-    log("incoming message: " + JSON.stringify(req), -2, "msg");
+    $bg.log("incoming message: " + JSON.stringify(req), 0, "msg");
 
     switch (req.type) {
         case 'gimmie_status':
@@ -215,7 +222,7 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
         case 'gimmie_config_and_options':
             //this happens on enable/disable of extension, no events are fired so $options is {}
             if (Object.keys($options).length === 0) {
-                log("$options is empty, attempting to retrieve from storage...", 0, "options");
+                $bg.log("$options is empty, attempting to retrieve from storage...", 2, "options");
                 get_options(function() {
                     sendResponse({
                         config: $config,
@@ -223,7 +230,7 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
                     });
                 }, false);
             } else {
-                log("$options found in memory, sending response...", 0, "options");
+                $bg.log("$options found in memory, sending response...", 1, "options");
                 sendResponse({
                     config: $config,
                     options: $options
@@ -248,7 +255,6 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
                 });
             });
             break;
-
 
         case 'save_options':
             save_options(function() {
@@ -276,6 +282,8 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
             sendResponse({
                message: "option '" + req.key + " = " + (typeof(req.value) == "object" ? JSON.stringify(req.value) : req.value)  + "' set"
             });
+
+            update_badge_text(); // for ssle_enabled option
             break;
 
         case 'set_rule':
@@ -317,7 +325,7 @@ function se(data) {
     update_badge_text();
 
     if ($options.ssle_enabled != 1) {
-        log("ssle is not enabled :) :(", -1, "ssle");
+        $bg.log("ssle is not enabled :) :(", 0, "ssle");
         return { cancel: false };
     }
 
@@ -332,7 +340,7 @@ function se(data) {
     var enforcement = 0;
     var status_msg = "";
 
-    log("get " + type + " (by tab: " + tid + ") - fqdn: " + fqdn + ", uri: " + uri, -2, "nav");
+    $bg.log("get " + type + " (by tab: " + tid + ") - fqdn: " + fqdn + ", uri: " + uri, 0, "nav");
 
     // check if our tab has initialized properly
     if (typeof $tab_status[tid] == 'undefined') {
@@ -341,7 +349,7 @@ function se(data) {
 
     // if the tab navigates to a new main url, clear the tab status
     if (type == "main_frame" && tab_has_status(tid)) {
-        log("nav to new main_frame, tab_status for tab " + tid + " reset", -2, "nav");
+        $bg.log("nav to new main_frame, tab_status for tab " + tid + " reset", 0, "nav");
         uninit_tab(tid);
         init_tab(tid);
     }
@@ -350,12 +358,12 @@ function se(data) {
         var rtest_ex = new RegExp(pattern_ex, $options.regex_flags);
         if (rtest_ex.test(fqdn + uri)) {
             status_msg = "exclusion rule matched for '" + fqdn + "' (" + pattern_ex + ")";
-            push_tab_status("warning", tid, -1, {
+            push_tab_status("warning", tid, 0, {
                 url: fqdn + uri,
                 pattern: pattern_ex
             });
 
-            log(status_msg, 1, "enforce");
+            $bg.log(status_msg, 1, "enforce");
             return { cancel: false };
         }
     }
@@ -368,7 +376,7 @@ function se(data) {
                 pattern: pattern_en
             });
 
-            log(status_msg, 1, "enforce");
+            $bg.log(status_msg, 1, "enforce");
             return (url.is_https() ? { cancel: false } : flood_check(fqdn + uri, secure_url, tid));
         }
     }
@@ -377,12 +385,12 @@ function se(data) {
         status_msg = "url '" + fqdn + uri + "' is already https, ignoring";
 
         if ($options.verbose_tab) {
-            push_tab_status("enforced", tid, 2, {
+            push_tab_status("enforced", tid, 0, {
                 url: fqdn + uri
             });
         }
 
-        log(status_msg, 1, "enforce");
+        $bg.log(status_msg, 1, "enforce");
         return { cancel: false };
     }
 
@@ -392,7 +400,7 @@ function se(data) {
         url: fqdn + uri,
         //msg: status_msg
     });
-    log(status_msg, 1, "enforce");
+    $bg.log(status_msg, 1, "enforce");
     return { cancel: false };
 }
 
@@ -407,11 +415,11 @@ function flood_check(url, secure_url, tid) {
     var status_msg = "";
 
     if (typeof $flood[url] == 'undefined') {
-        log("url not tracked, initializing: " + url, -1, "flood");
+        $bg.log("url not tracked, initializing: " + url, 0, "flood");
         $flood[url] = { hits: 1 };
         setTimeout(function() {
             if (typeof $flood[url] != 'undefined') {
-                log("tracking expired for: " + url, -1, "flood");
+                $bg.log("tracking expired for: " + url, 0, "flood");
                 delete $flood[url];
             }
         }, $options.flood.ms);
@@ -419,12 +427,12 @@ function flood_check(url, secure_url, tid) {
     } else if ($flood[url].hits > $options.flood.hits) {
         status_msg = "url is flooding, will not enforce SSL (" + $flood[url].hits + " hits in " + $options.flood.ms + "ms): " + url;
 
-        push_tab_status("error", tid, -2, {
+        push_tab_status("error", tid, 0, {
             url: url,
             //msg: status_msg
         });
 
-        log(status_msg, 1, "flood");
+        $bg.log(status_msg, 1, "flood");
         return { cancel: false };
     } else {
         $flood[url].hits++;
@@ -442,10 +450,10 @@ function push_tab_status(state, tid, reason, data) {
     }
 
     if (tab_reason_url_count(tid, state, reason) > $options.max_tab_status) {
-        log("tab status count exceeded " + $options.max_tab_status + " for '" + tid + "', ssle will cease reporting on new urls but will continue to enforce", 1, "ssle");
+        $bg.log("tab status count exceeded " + $options.max_tab_status + " for '" + tid + "', ssle will cease reporting on new urls but will continue to enforce", 1, "ssle");
     } else {
         $tab_status[tid][state][reason].push(data);
-        log("pushed status to tab "+ tid +"("+state+"): "+ JSON.stringify(data), -1, "tabs");
+        $bg.log("pushed status to tab "+ tid +"("+state+"): "+ JSON.stringify(data), 0, "tabs");
     }
 }
 
@@ -490,7 +498,7 @@ function uninit_tab(tid) {
     delete $tab_status[tid];
     update_badge_text();
 
-    log("tab_status for "+ tid +" uninitialized", -1, "tabs");
+    $bg.log("tab_status for "+ tid +" uninitialized", 0, "tabs");
 }
 
 function init_tab(tid) {
@@ -504,7 +512,7 @@ function init_tab(tid) {
     update_badge_text();
     set_icon("disabled", tid);
 
-    log("tab_status for "+ tid +" initialized", -1, "tabs");
+    $bg.log("tab_status for "+ tid +" initialized", 0, "tabs");
 }
 
 /**
@@ -520,15 +528,15 @@ function get_options(callback, convert_legacy) {
 
     $storage.get("options", function(items) {
         if (typeof chrome.runtime.lastError != 'undefined') {
-            log("error on storage.get: " + JSON.stringify(chrome.runtime.lastError), $options_defaults.log_level, "storage");
+            $bg.log("error on storage.get: " + JSON.stringify(chrome.runtime.lastError), 1, "storage");
         }
 
         if (typeof items.options == 'undefined') {
-            log("no options in storage, using hard defaults", $options_defaults.log_level, "storage");
+            $bg.log("no options in storage, using hard defaults", 1, "storage");
             $options = JSON.parse(JSON.stringify($options_defaults));
         } else {
             if (convert_legacy) {
-                log('performing legacy ruleset conversion', $options_defaults.log_level, 'ruleset');
+                $bg.log('performing legacy ruleset conversion', 1, 'ruleset');
                 items.options.ssle = convert_legacy_ruleset(items.options.ssle);
             }
 
@@ -537,7 +545,7 @@ function get_options(callback, convert_legacy) {
             }
             update_badge_text();
 
-            log("options retrieved from storage (" + STORAGE_TYPE + ")", 0, "storage");
+            $bg.log("options retrieved from storage (" + AppConfig.STORAGE_TYPE + ")", 1, "storage");
         }
 
         if (typeof callback == 'function') {
@@ -550,14 +558,14 @@ function save_options(callback) {
     clearTimeout($timeouts.save_options);
     $timeouts.save_options = setTimeout(function() {
         $storage.set({options: $options}, function() {
-            log("options saved to storage (" + STORAGE_TYPE + ")", 0, "storage");
+            $bg.log("options saved to storage (" + AppConfig.STORAGE_TYPE + ")", 1, "storage");
 
             if (typeof callback == 'function'){
                 callback();
             }
         });
     }, $config.save_options_delay);
-    log("options save action delayed by " + $config.save_options_delay + "ms to avoid flooding storage", -2, "debug");
+    $bg.log("options save action delayed by " + $config.save_options_delay + "ms to avoid flooding storage", 1, "debug");
 }
 
 // expects the $options.ssle object
@@ -568,7 +576,7 @@ function convert_legacy_ruleset(ruleset) {
                 var rule_fix = "^[a-z0-9\\-\\.]*" + rule.substr(5);
                 ruleset[type][rule_fix] = { id: ruleset[type][rule].id };
                 delete ruleset[type][rule];
-                log("rule fix '" + rule + "' -> '" + rule_fix + "' = '" + JSON.stringify(ruleset[type][rule_fix]) + "'",  $options_defaults.log_level, "legacy");
+                $bg.log("rule fix '" + rule + "' -> '" + rule_fix + "' = '" + JSON.stringify(ruleset[type][rule_fix]) + "'",  0, "legacy");
             }
             if (typeof ruleset[type][rule].subdomains != 'undefined') {
                 var regex_rule = rule.escape_regex();
@@ -579,7 +587,7 @@ function convert_legacy_ruleset(ruleset) {
                 ruleset[type][regex_rule] = { id: ruleset[type][rule].id };
                 delete ruleset[type][rule];
 
-                log("converted legacy rule '" + rule + "' -> '" + regex_rule + "' = '" + JSON.stringify(ruleset[type][regex_rule]) + "'",  $options_defaults.log_level, "legacy");
+                $bg.log("converted legacy rule '" + rule + "' -> '" + regex_rule + "' = '" + JSON.stringify(ruleset[type][regex_rule]) + "'", 1, "legacy");
             }
         }
     }
@@ -624,4 +632,24 @@ function sync_with_default_ruleset() {
             $options.ssle[ruleset_type][rule] = $options_defaults.ssle[ruleset_type][rule];
         }
     }
+}
+
+function set_icon(icon, tid) {
+    if (tid != -1) {
+        chrome.browserAction.setIcon({
+            path: $config.icons[icon],
+            tabId: tid
+        });
+
+        $bg.log("icon set to '" + icon + "' on tab: " + tid, 0, 'icon');
+    } else {
+        $bg.log("icon not set for tab: " + tid, 0, 'icon');
+    }
+
+}
+
+function update_badge_text() {
+    chrome.browserAction.setBadgeText({
+        "text" : ($options.ssle_enabled ? "" : "x")
+    });
 }
