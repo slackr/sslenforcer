@@ -30,7 +30,7 @@ function populate_options() {
     populate_rules('#folder_exclude', $options.ssle.exclude);
 
     $('#advanced_options, #enforce, #exclude').on("click", function() {
-        $(this).next('div').toggle('fast');
+        $(this).next('div').slideToggle('fast');
     });
 
     $('#ext_save_options')
@@ -128,9 +128,9 @@ function populate_options() {
                     return false;
                 }
 
-                save_id = uniq_id();
+                save_id = $o.uniq_id();
             } else if (select_record_by_id(save_id)) {
-                save_id = uniq_id();
+                save_id = $o.uniq_id();
             }
 
             $(this)
@@ -484,4 +484,23 @@ function import_options() {
     })(files[0]); // files[0] assumes only one file has been selected
 
     return read.readAsText(files[0]);
+}
+
+function show_popup(popup_id) {
+    $(popup_id).fadeIn('fast');
+}
+function hide_popup(popup_id) {
+    $(popup_id).fadeOut('fast');
+}
+
+
+function select_record_by_id(id) {
+    for (var type in $options.ssle) {
+        for (var entry in $options.ssle[type]) {
+            if ($options.ssle[type][entry].id == id) {
+                return { type: type, entry: entry };
+            }
+        }
+    }
+    return undefined;
 }

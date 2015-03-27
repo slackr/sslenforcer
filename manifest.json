@@ -35,7 +35,7 @@
         "scripts": [
             "lib/config.js",
             "lib/object.js",
-            "js/common.js",
+            "controller/background.js",
             "js/background.js"
         ]
     },

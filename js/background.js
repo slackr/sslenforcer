@@ -113,7 +113,7 @@ var $timeouts = {
     save_options: null
 };
 
-var $bg = new SknObject('bg');
+var $bg = new SknBackground();
 
 /**
  * webRequest listeners
@@ -288,7 +288,7 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
 
         case 'set_rule':
             if (req.value.id === '') {
-                req.value.id = uniq_id();
+                req.value.id = $bg.uniq_id();
             } else { //cleanup existing rule before an edit
                 delete_record_by_id(req.value.id);
             }
@@ -333,8 +333,8 @@ function se(data) {
     var url = data.url;
     var type = data.type;
 
-    var fqdn = url.url_parse("fqdn");
-    var uri = url.url_parse("uri");
+    var fqdn = $bg.url_parse(url, "fqdn");
+    var uri = $bg.url_parse(url, "uri");
     var secure_url = "https://" + fqdn + uri;
 
     var enforcement = 0;
@@ -377,11 +377,11 @@ function se(data) {
             });
 
             $bg.log(status_msg, 1, "enforce");
-            return (url.is_https() ? { cancel: false } : flood_check(fqdn + uri, secure_url, tid));
+            return ($bg.is_https(url) ? { cancel: false } : flood_check(fqdn + uri, secure_url, tid));
         }
     }
 
-    if (url.is_https()) {
+    if ($bg.is_https(url)) {
         status_msg = "url '" + fqdn + uri + "' is already https, ignoring";
 
         if ($options.verbose_tab) {
@@ -400,6 +400,7 @@ function se(data) {
         url: fqdn + uri,
         //msg: status_msg
     });
+
     $bg.log(status_msg, 1, "enforce");
     return { cancel: false };
 }
@@ -475,23 +476,6 @@ function tab_has_status(tid) {
         }
     }
     return has_status;
-}
-
-/**
- * check if url is a supported request type
- *
- * tab_status is only populated when onBeforeRequest triggers
- * which is filtered by $config.filters
- */
-function url_isin_types(url) {
-    if (typeof $tab_status[tid] != 'undefined') {
-        for (var state in $config.states) {
-            if ($tab_status[tid][state].contains(u)) {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 function uninit_tab(tid) {
@@ -579,10 +563,10 @@ function convert_legacy_ruleset(ruleset) {
                 $bg.log("rule fix '" + rule + "' -> '" + rule_fix + "' = '" + JSON.stringify(ruleset[type][rule_fix]) + "'",  0, "legacy");
             }
             if (typeof ruleset[type][rule].subdomains != 'undefined') {
-                var regex_rule = rule.escape_regex();
+                var regex_rule = $bg.escape_regex(rule);
 
                 regex_rule = ((ruleset[type][rule].subdomains == 1) ? "^[a-z0-9\\-\\.]*" : "^") + regex_rule;
-                regex_rule = regex_rule + ((ruleset[type][rule].uri !== '') ? ruleset[type][rule].uri.escape_regex() + "$" : "/.*$");
+                regex_rule = regex_rule + ((ruleset[type][rule].uri !== '') ? $bg.escape_regex(ruleset[type][rule].uri) + "$" : "/.*$");
 
                 ruleset[type][regex_rule] = { id: ruleset[type][rule].id };
                 delete ruleset[type][rule];
@@ -652,4 +636,15 @@ function update_badge_text() {
     chrome.browserAction.setBadgeText({
         "text" : ($options.ssle_enabled ? "" : "x")
     });
+}
+
+
+function delete_record_by_id(id) {
+    for (var type in $options.ssle) {
+        for (var entry in $options.ssle[type]) {
+            if ($options.ssle[type][entry].id == id) {
+                delete $options.ssle[type][entry];
+            }
+        }
+    }
 }

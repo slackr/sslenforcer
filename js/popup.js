@@ -85,7 +85,7 @@ function draw_state(state, state_data) {
                     .addClass('state_' + state)
                     .addClass('buttonize')
                     .on("click", function() {
-                        $(this).next('div').toggle('fast');
+                        $(this).next('div').slideToggle('fast');
                     })
                 ,
                 $('<div>')
@@ -99,13 +99,13 @@ function draw_state(state, state_data) {
         $p.log(state + " state url count: " + urls.length, 0, 'state');
         for (var u = 0; u < urls.length; u++) {
             var fullurl = urls[u].url;
-            var url = fullurl.limit(75);
-            var fulluri = urls[u].url.url_parse("uri");
+            var url = $p.limit(fullurl, 75);
+            var fulluri = $p.url_parse(urls[u].url, "uri");
             var matched_pattern = typeof urls[u].pattern != "undefined" ? "Rule: " + urls[u].pattern : '';
 
-            var fqdn = url.url_parse("fqdn");
-            var uri = url.url_parse("uri");
-            var domain = fqdn.url_parse("domain");
+            var fqdn = $p.url_parse(url, "fqdn");
+            var uri = $p.url_parse(url, "uri");
+            var domain = $p.url_parse(fqdn, "domain");
 
             $p.log("processing url: " + fullurl, 0, 'state');
 
@@ -123,7 +123,7 @@ function draw_state(state, state_data) {
                                 .text(domain)
 
                                 .on("click", function() {
-                                    $(this).next('div').toggle('fast');
+                                    $(this).next('div').slideToggle('fast');
                                 })
                         )
                         .children(':last');
@@ -170,4 +170,17 @@ function toggle_ssle() {
     chrome.extension.sendRequest({type: 'set_option', key: 'ssle_enabled', value: $options.ssle_enabled}, function() {
         chrome.extension.sendRequest({type: 'save_options'}, $p.message_received);
     });
+}
+
+/**
+ * return array of states sorted by descending weight
+ */
+function prioritize_states() {
+    var stateSortArr = [];
+    for (var stateName in $config.states) {
+        stateSortArr.push({ name: stateName, weight: $config.states[stateName].weight });
+    }
+
+    stateSortArr.sort(function(a, b) { return b.weight - a.weight; }); //b - a for descending sort
+    return stateSortArr.map(function(state) { return state.name; });
 }
