@@ -96,7 +96,7 @@ function draw_state(state, state_data) {
             )
             .children(':last');
 
-        $p.log(state + " state url count: " + urls.length, 0, 'state');
+        $p.log(state + " state url count: " + urls.length, 1, 'state');
         for (var u = 0; u < urls.length; u++) {
             var fullurl = urls[u].url;
             var url = $p.limit(fullurl, 75);

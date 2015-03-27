@@ -36,7 +36,7 @@
             "lib/config.js",
             "lib/object.js",
             "controller/background.js",
-            "js/background.js"
+            "app.js"
         ]
     },
 
