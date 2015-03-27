@@ -1,14 +1,11 @@
-var $options = {};
-var $config = {};
-
-var $o = new SknObject('options');
+var $options = new SknObject('options');
 
 $(document).ready(function($) {
-    chrome.extension.sendRequest({type: 'gimmie_config_and_options'}, function(ret) {
-        $options = ret.options;
-        $config = ret.config;
+    chrome.extension.sendRequest({type: 'gimmie_options'}, function(ret) {
+        $options.options = ret.options;
+        $options.config = AppConfig.CONFIG;
 
-        $o.log("retrieved $options and $config from background.js", 0, 'init');
+        $options.log("retrieved options and config from bg", 0, 'init');
         initialize_page();
     });
 });
@@ -26,8 +23,8 @@ function initialize_page() {
 }
 
 function populate_options() {
-    populate_rules('#folder_enforce', $options.ssle.enforce);
-    populate_rules('#folder_exclude', $options.ssle.exclude);
+    populate_rules('#folder_enforce', $options.options.ssle.enforce);
+    populate_rules('#folder_exclude', $options.options.ssle.exclude);
 
     $('#advanced_options, #enforce, #exclude').on("click", function() {
         $(this).next('div').slideToggle('fast');
@@ -86,8 +83,8 @@ function populate_options() {
                     .text('Syncing Ruleset...');
 
                 chrome.extension.sendRequest({type: 'sync_with_default_ruleset'}, function(data) {
-                    $o.message_received(data);
-                    $o.log('sync was successful, reloading page...', 1, 'sync');
+                    $options.message_received(data);
+                    $options.log('sync was successful, reloading page...', 1, 'sync');
                     window.location.reload();
                 });
             }
@@ -121,16 +118,16 @@ function populate_options() {
             var save_id = $('#rule_id').val();
             var old_id = save_id; // on save we generate a new id, and we need this to remove old element
             if (save_id === '') {
-                if (typeof $options.ssle[save_type][save_pattern] != 'undefined') {
+                if (typeof $options.options.ssle[save_type][save_pattern] != 'undefined') {
                     $('#rule_pattern').addClass("ui_value_error").focus();
                     alert("A rule for '" + save_pattern + "' already exists in the '" + save_type + "' ruleset.");
                     setTimeout(function() { $('#rule_pattern').removeClass('ui_value_error'); }, 700);
                     return false;
                 }
 
-                save_id = $o.uniq_id();
+                save_id = $options.uniq_id();
             } else if (select_record_by_id(save_id)) {
-                save_id = $o.uniq_id();
+                save_id = $options.uniq_id();
             }
 
             $(this)
@@ -146,7 +143,7 @@ function populate_options() {
                         old_id: old_id,
                     }
                 }, function (data) {
-                    $o.message_received(data);
+                    $options.message_received(data);
 
                     chrome.extension.sendRequest({type: 'save_options'}, function(data) {
                         options_saved(data);
@@ -192,17 +189,17 @@ function populate_options() {
             hide_popup('#popup_import_options');
         });
 
-    $('#option_value_flood_hits').text($options.flood.hits);
-    $('#option_value_flood_ms').text($options.flood.ms);
-    $('#option_value_log_level').text($options.log_level);
-    $('#option_value_max_tab_status').text($options.max_tab_status);
+    $('#option_value_flood_hits').text($options.options.flood.hits);
+    $('#option_value_flood_ms').text($options.options.flood.ms);
+    $('#option_value_log_level').text($options.options.log_level);
+    $('#option_value_max_tab_status').text($options.options.max_tab_status);
 
     ui_attach_value_changer($('#option_value_flood_hits'), { title: "Improper values may cause redirect loops on sites which insist on HTTP", inc_value: 1, lowest: 1, highest: 20,
         callback: function() {
             chrome.extension.sendRequest({type: 'set_option', key: 'flood', value: {
                 hits: parseInt($('#option_value_flood_hits').text()),
                 ms: parseInt($('#option_value_flood_ms').text())
-            }}, $o.message_received);
+            }}, $options.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
@@ -211,38 +208,38 @@ function populate_options() {
             chrome.extension.sendRequest({type: 'set_option', key: 'flood', value: {
                 hits: parseInt($('#option_value_flood_hits').text()),
                 ms: parseInt($('#option_value_flood_ms').text())
-            }}, $o.message_received);
+            }}, $options.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
     ui_attach_value_changer($('#option_value_log_level'), { title: "Low logging levels may have a negative impact on browser performance!", inc_value: 1, lowest: 0, highest: 3,
         callback: function() {
-            chrome.extension.sendRequest({type: 'set_option', key: 'log_level', value: parseInt($('#option_value_log_level').text())}, $o.message_received);
+            chrome.extension.sendRequest({type: 'set_option', key: 'log_level', value: parseInt($('#option_value_log_level').text())}, $options.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
     ui_attach_value_changer($('#option_value_max_tab_status'), { title: "Higher limits may have a negative impact on browser performance!", inc_value: 10, lowest: 10, highest: 1000,
         callback: function() {
-            chrome.extension.sendRequest({type: 'set_option', key: 'max_tab_status', value: parseInt($('#option_value_max_tab_status').text())}, $o.message_received);
+            chrome.extension.sendRequest({type: 'set_option', key: 'max_tab_status', value: parseInt($('#option_value_max_tab_status').text())}, $options.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
 
-    ui_attach_checkbox($('#option_verbose_tab'), { on: $options.verbose_tab,
+    ui_attach_checkbox($('#option_verbose_tab'), { on: $options.options.verbose_tab,
         callback: function() {
-            chrome.extension.sendRequest({type: 'set_option', key: 'verbose_tab', value: $('#option_verbose_tab_ui_checkbox').data('is_checked') }, $o.message_received);
+            chrome.extension.sendRequest({type: 'set_option', key: 'verbose_tab', value: $('#option_verbose_tab_ui_checkbox').data('is_checked') }, $options.message_received);
             chrome.extension.sendRequest({type: 'save_options'}, options_saved);
         }
     });
 
-    for (var flag in $config.allowed_regex_flags) {
-        ui_attach_checkbox($('#option_regex_flags_' + flag), { on: ($options.regex_flags.match(flag) ? 1 : 0), check_text: flag, uncheck_text: "\u2006", title: $config.allowed_regex_flags[flag],
+    for (var flag in $options.config.allowed_regex_flags) {
+        ui_attach_checkbox($('#option_regex_flags_' + flag), { on: ($options.options.regex_flags.match(flag) ? 1 : 0), check_text: flag, uncheck_text: "\u2006", title: $options.config.allowed_regex_flags[flag],
             callback: function() {
                 var regex_flags_value = "";
-                for (var val in $config.allowed_regex_flags) {
+                for (var val in $options.config.allowed_regex_flags) {
                     regex_flags_value += ($('#option_regex_flags_' + val + '_ui_checkbox').data('is_checked') == 1 ? val : '');
                 }
-                chrome.extension.sendRequest({type: 'set_option', key: 'regex_flags', value: regex_flags_value }, $o.message_received);
+                chrome.extension.sendRequest({type: 'set_option', key: 'regex_flags', value: regex_flags_value }, $options.message_received);
                 chrome.extension.sendRequest({type: 'save_options'}, options_saved);
             }
         });
@@ -374,11 +371,11 @@ function delete_rule_entry(delete_id) {
             .addClass('warning')
             .fadeOut('fast');
 
-        $o.log("rule type '" + record.type + "' with id '" + delete_id + "' was deleted", 1, 'rule');
-        chrome.extension.sendRequest({type: 'delete_rule', id: delete_id, rule_type: record.type, rule_entry: record.entry}, $o.message_received);
+        $options.log("rule type '" + record.type + "' with id '" + delete_id + "' was deleted", 1, 'rule');
+        chrome.extension.sendRequest({type: 'delete_rule', id: delete_id, rule_type: record.type, rule_entry: record.entry}, $options.message_received);
         chrome.extension.sendRequest({type: 'save_options'}, options_saved);
     } else {
-        $o.log("rule with id '" + delete_id + "' not found for deletion", 3, 'rule');
+        $options.log("rule with id '" + delete_id + "' not found for deletion", 3, 'rule');
     }
 }
 
@@ -386,7 +383,7 @@ function edit_rule_entry(edit_id) {
     var record = select_record_by_id(edit_id);
     if (typeof record != "undefined") {
 
-        $('#rule_id').val($options.ssle[record.type][record.entry].id);
+        $('#rule_id').val($options.options.ssle[record.type][record.entry].id);
         $('#rule_type').val(record.type);
 
         $('#rule_pattern').val(record.entry);
@@ -397,23 +394,23 @@ function edit_rule_entry(edit_id) {
         show_popup('#popup_rule');
         $('#rule_pattern').focus();
     } else {
-        $o.log("rule with id '" + edit_id + "' not found for edit", 3, 'rule');
+        $options.log("rule with id '" + edit_id + "' not found for edit", 3, 'rule');
     }
 }
 
 function options_saved(data) {
     if (typeof data.options != 'undefined') {
-        $o.log("options data returned with 'save_options' confirmation message", 1, 'options');
-        $options = data.options;
+        $options.log("options data returned with 'save_options' confirmation message", 1, 'options');
+        $options.options = data.options;
     }
-    $o.message_received(data);
+    $options.message_received(data);
 
     write_info("Options successfully saved to storage!");
 }
 
 function export_options() {
     var filename = 'ssle_options.json';
-    var data = encodeURIComponent(JSON.stringify($options));
+    var data = encodeURIComponent(JSON.stringify($options.options));
     $('body').append(
         $('<a>')
             .attr('id', 'export_options')
@@ -423,7 +420,7 @@ function export_options() {
     $('#export_options')[0].click();
     $('#export_options').remove();
 
-    $o.log('options exported to: ' + filename, 1, 'export');
+    $options.log('options exported to: ' + filename, 1, 'export');
 }
 
 function cleanup_imported_options(data) {
@@ -431,19 +428,19 @@ function cleanup_imported_options(data) {
     try {
         json = JSON.parse(data);
     } catch (e) {
-        $o.log("json parse failed on imported data: " + e, 3, 'import');
+        $options.log("json parse failed on imported data: " + e, 3, 'import');
         alert('File import failed (JSON formatting error): ' + e);
         return false;
     }
     if (typeof json == 'object') {
         for (var key in json) { // sanity check
-            if (typeof $options[key] == 'undefined') {
+            if (typeof $options.options[key] == 'undefined') {
                 delete json[key];
             }
         }
     }
 
-    $o.log("import options cleanup: " + JSON.stringify(json), 0, 'import');
+    $options.log("import options cleanup: " + JSON.stringify(json), 0, 'import');
     return json;
 }
 
@@ -455,13 +452,13 @@ function import_options() {
 
     if (!(files instanceof FileList) || files.length === 0){
         alert('Please select an options file to import (JSON format)');
-        $o.log("import failed, no file selected", 3, 'import');
+        $options.log("import failed, no file selected", 3, 'import');
         return false;
     }
 
-    if (files[0].size > $config.max_import_filesize) {
-        alert('Options file too large. Limit: ' + ($config.max_import_filesize / 1024).toFixed(0) + 'KB');
-        $o.log("import failed, file too large: " + files[0].size, 3, 'import');
+    if (files[0].size > $options.config.max_import_filesize) {
+        alert('Options file too large. Limit: ' + ($options.config.max_import_filesize / 1024).toFixed(0) + 'KB');
+        $options.log("import failed, file too large: " + files[0].size, 3, 'import');
         return false;
     }
 
@@ -475,8 +472,8 @@ function import_options() {
             if (clean_options) {
                 $('#import_options').text('Importing...');
                 chrome.extension.sendRequest({type: 'import_options', options: clean_options}, function(data) {
-                    $o.message_received(data);
-                    $o.log("import successful, reloading page...", 1, 'import');
+                    $options.message_received(data);
+                    $options.log("import successful, reloading page...", 1, 'import');
                     window.location.reload();
                 });
             }
@@ -495,9 +492,9 @@ function hide_popup(popup_id) {
 
 
 function select_record_by_id(id) {
-    for (var type in $options.ssle) {
-        for (var entry in $options.ssle[type]) {
-            if ($options.ssle[type][entry].id == id) {
+    for (var type in $options.options.ssle) {
+        for (var entry in $options.options.ssle[type]) {
+            if ($options.options.ssle[type][entry].id == id) {
                 return { type: type, entry: entry };
             }
         }

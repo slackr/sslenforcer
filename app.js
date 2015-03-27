@@ -9,98 +9,14 @@
  */
 
 /**
- * Which storage object to bind to
- *
- * @see AppConfig#STORAGE_TYPE
- */
-var $storage = (AppConfig.STORAGE_TYPE == 'sync' ? chrome.storage.sync : chrome.storage.local);
-
-/**
  * user config hard defaults
  */
-var $options_defaults = {
-    ssle_enabled: 1,
-    log_level: 3,
-    verbose_tab: 0,
-    regex_flags: "ig",
-    flood: {
-        hits: 3,
-        ms: 2000,
-    },
-    max_tab_status: 100,
-
-    ssle : {
-        enforce: {
-            '^[a-z0-9\\-\\.]*google\\.(ca|com)/.*$': { id: "iafcc8854" },
-            '^[a-z0-9\\-\\.]*wikipedia\\.org/.*$': { id: "ia74d8e02" },
-            '^[a-z0-9\\-\\.]*chrome\\.com/.*$': { id: "ie7b9ad91" },
-            '^[a-z0-9\\-\\.]*linkedin\\.com/.*$': { id: "i5c9f10bf" },
-            '^[a-z0-9\\-\\.]*facebook\\.com/.*$': { id: "iee48a9a4" },
-            '^[a-z0-9\\-\\.]*twitter\\.com/.*$': { id: "i1a845a6a" },
-            '^[a-z0-9\\-\\.]*fbcdn\\.net/.*$': { id: "ib4575dbb" },
-            '^[a-z0-9\\-\\.]*imgur\\.com/.*$': { id: "i9ad4b56e" },
-            '^webcache\\.googleusercontent\\.com/.*$': { id: "ib2890983" },
-            '^[a-z0-9\\-\\.]*reddit\\.com/.*$': { id: "i2ebf94ef" },
-            '^[a-z0-9\\-\\.]*instagram\\.com/.*$': { id: "ifa079487" },
-            '^[a-z0-9\\-\\.]*yahoo\\.(ca|com)/.*$': { id: "ib4d10a60" },
-            '^[a-z0-9\\-\\.]*echoes\\.im/.*$': { id: "ie6fffe6c" },
-        },
-        exclude: {
-            // /blank.html causes issues with http://www.google.ca/imgres urls
-            // URL floods out and tries to load https iframe, Chrome blocks it
-            '^www\\.google\\.(ca|com)/blank.html$': { id: "i0ad1fd08" }, // to fix images.google.com ssl enforcement
-        },
-    },
-};
+var $options_defaults = AppConfig.OPTIONS_DEFAULTS;
 
 /**
  * defaults will be loaded by get_options()
  */
 var $options = {};
-
-/**
- * engine config
- */
-var $config = {
-    max_import_filesize: 5242880, //5mb
-    save_options_delay: 3000,
-    allowed_regex_flags: {
-        "i" : "Case-Insensitive",
-        "g" : "Global Search"
-    },
-    filters: {
-        urls: ["http://*/*", "https://*/*"],
-        types: [
-            "main_frame",
-            "sub_frame",
-            "script",
-            "object",
-            "xmlhttprequest",
-            "stylesheet",
-            "image",
-            "other",
-        ]
-    },
-    icons: { // icons borrowed from http://dakirby309.deviantart.com/gallery/#/d4n4w3q with promise of safe return
-        enforced: "img/enforced.png",
-        disabled: "img/disabled.png",
-        warning: "img/warning.png",
-        error: "img/error.png",
-    },
-    states: {
-        enforced: { weight: 0 },
-        disabled: { weight: 10 },
-        warning: { weight: 20 },
-        error: { weight: 30 },
-    },
-    state_reason: {
-        "0,": "Not enforced due to flooding",
-        "-1": "Enforcement explicitly disabled",
-        "0": "No rules matched",
-        "1": "Rule matched for enforcement",
-        "2": "URL was accessed via HTTPS",
-    },
-};
 
 // http redirect loop protection
 var $flood = {};
@@ -121,7 +37,7 @@ var $bg = new SknBackground();
 chrome.webRequest.onBeforeRequest.addListener(
     se,
     // filters
-    $config.filters,
+    $bg.config.filters,
     // extraInfoSpec
     ["blocking"]
 );
@@ -137,9 +53,9 @@ chrome.webRequest.onCompleted.addListener(function(data) {
             && typeof $tab_status[tid] != 'undefined') {
             for (var state in $tab_status[tid]) {
                 if (Object.keys($tab_status[tid][state]).length > 0
-                    && $config.states[state].weight >= current_weight) {
+                    && $bg.config.states[state].weight >= current_weight) {
                     current_state = state;
-                    current_weight = $config.states[state].weight;
+                    current_weight = $bg.config.states[state].weight;
                 }
             }
 
@@ -153,13 +69,13 @@ chrome.webRequest.onCompleted.addListener(function(data) {
 
         set_icon(current_state, tid);
     },
-    $config.filters
+    $bg.config.filters
 );
 
 chrome.webRequest.onBeforeRedirect.addListener(function(data) {
         $bg.log("onBeforeRedirect: " + JSON.stringify(data), 0, "debug");
     },
-    $config.filters
+    $bg.config.filters
 );
 
 /**
@@ -219,27 +135,25 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
             });
             break;
 
-        case 'gimmie_config_and_options':
+        case 'gimmie_options':
             //this happens on enable/disable of extension, no events are fired so $options is {}
             if (Object.keys($options).length === 0) {
                 $bg.log("$options is empty, attempting to retrieve from storage...", 2, "options");
                 get_options(function() {
                     sendResponse({
-                        config: $config,
                         options: $options
                     });
                 }, false);
             } else {
                 $bg.log("$options found in memory, sending response...", 1, "options");
                 sendResponse({
-                    config: $config,
                     options: $options
                 });
             }
             break;
 
         case 'restore_default_options':
-            $storage.clear();
+            $bg.storage.clear();
             get_options();
             sendResponse({
                message: "storage was cleared and default options were restored"
@@ -468,7 +382,7 @@ function tab_reason_url_count(tid, state, reason) {
 function tab_has_status(tid) {
     var has_status = false;
     if (typeof $tab_status[tid] != 'undefined') {
-        for (var state in $config.states) {
+        for (var state in $bg.config.states) {
             if (Object.keys($tab_status[tid][state]).length > 0) {
                 has_status = true;
                 break;
@@ -489,7 +403,7 @@ function init_tab(tid) {
     // initialize tab_status
     $tab_status[tid] = {};
 
-    for (var state in $config.states) {
+    for (var state in $bg.config.states) {
         $tab_status[tid][state] = {};
     }
 
@@ -510,7 +424,7 @@ function get_options(callback, convert_legacy) {
         $options = JSON.parse(JSON.stringify($options_defaults));
     }
 
-    $storage.get("options", function(items) {
+    $bg.storage.get("options", function(items) {
         if (typeof chrome.runtime.lastError != 'undefined') {
             $bg.log("error on storage.get: " + JSON.stringify(chrome.runtime.lastError), 1, "storage");
         }
@@ -541,15 +455,15 @@ function get_options(callback, convert_legacy) {
 function save_options(callback) {
     clearTimeout($timeouts.save_options);
     $timeouts.save_options = setTimeout(function() {
-        $storage.set({options: $options}, function() {
+        $bg.storage.set({options: $options}, function() {
             $bg.log("options saved to storage (" + AppConfig.STORAGE_TYPE + ")", 1, "storage");
 
             if (typeof callback == 'function'){
                 callback();
             }
         });
-    }, $config.save_options_delay);
-    $bg.log("options save action delayed by " + $config.save_options_delay + "ms to avoid flooding storage", 1, "debug");
+    }, $bg.config.save_options_delay);
+    $bg.log("options save action delayed by " + $bg.config.save_options_delay + "ms to avoid flooding storage", 1, "debug");
 }
 
 // expects the $options.ssle object
@@ -621,7 +535,7 @@ function sync_with_default_ruleset() {
 function set_icon(icon, tid) {
     if (tid != -1) {
         chrome.browserAction.setIcon({
-            path: $config.icons[icon],
+            path: $bg.config.icons[icon],
             tabId: tid
         });
 
