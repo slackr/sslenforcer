@@ -99,7 +99,7 @@ chrome.tabs.onRemoved.addListener(function(tid){
 chrome.runtime.onInstalled.addListener(function(details) {
     switch (details.reason) {
         case "install":
-            $bg.log("initializing extension...", 1, "install"); // use $options_defaults.log_level as level to make sure log is shown
+            $bg.log("initializing extension...", 1, "install");
             save_options(); // write hard defaults
             break;
         case "update":
@@ -421,6 +421,7 @@ function get_options(callback, convert_legacy) {
         /**
          * clone object, doesn't support object values.. (regex)
          */
+        $bg.log("no options in memory, using defaults", 1, "storage");
         $options = JSON.parse(JSON.stringify($options_defaults));
     }
 
@@ -430,7 +431,7 @@ function get_options(callback, convert_legacy) {
         }
 
         if (typeof items.options == 'undefined') {
-            $bg.log("no options in storage, using hard defaults", 1, "storage");
+            $bg.log("no options in storage, using defaults", 1, "storage");
             $options = JSON.parse(JSON.stringify($options_defaults));
         } else {
             if (convert_legacy) {
@@ -453,6 +454,14 @@ function get_options(callback, convert_legacy) {
 }
 
 function save_options(callback) {
+    if (Object.keys($options).length === 0) {
+        /**
+         * clone object, doesn't support object values.. (regex)
+         */
+        $bg.log("no options in memory, using defaults", 1, "storage");
+        $options = JSON.parse(JSON.stringify($options_defaults));
+    }
+
     clearTimeout($timeouts.save_options);
     $timeouts.save_options = setTimeout(function() {
         $bg.storage.set({options: $options}, function() {
