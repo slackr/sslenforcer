@@ -5,12 +5,25 @@
     <title></title>
     <link rel="stylesheet" href="../css/common.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="../css/options.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="../view/ui.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="../view/theme/dark.css" type="text/css" media="screen" />
     <script type="text/javascript" src="../lib/config.js"></script>
     <script type="text/javascript" src="../lib/object.js"></script>
+    <script type="text/javascript" src="../controller/ui.js"></script>
     <script type="text/javascript" src="../lib/ext/jquery.js"></script>
     <script type="text/javascript" src="../js/options.js"></script>
 </head>
 <body>
+<div id="popup">
+    <div id="popup_wrapper">
+        <div id="popup_title"></div>
+        <div id="popup_message"></div>
+        <div id="popup_input">
+            <div id="popup_yes" class="button"></div>
+            <div id="popup_no" class="button"></div>
+        </div>
+    </div>
+</div>
 <div id="popup_import_options" class="popup_wrapper hidden">
     <div id="popup_import_options_message" class="popup_message padded">
         <div class="padded margined" id="import_title"></div>
@@ -18,13 +31,13 @@
             Select a settings file to import (JSON format)
         </div>
         <div class="table padded info" id="import_area">
-            <span class="padded">
+            <div class="padded">
                 <input type="file" class="ui_textbox ui_textbox_longer padded" value="" id="import_options_file" />
-            </span>
-            <span class="padded float_right">
-                <span id="import_options" class="buttonize button_neutral padded"></span>
-                <span id="import_cancel" class="buttonize button_neutral padded"></span>
-            </span>
+            </div>
+            <div class="float_right">
+                <span id="import_options" class="button"></span>
+                <span id="import_cancel" class="button"></span>
+            </div>
         </div>
     </div>
 </div>
@@ -46,16 +59,16 @@
                 <br />
                 Match a specific URL: <span class="regex">^www\.rogers\.com/web/Rogers\.portal$</span>
             </div>
-            <span class="padded">
+            <div class="padded">
                 <input type="hidden" value="" id="rule_id" />
                 <input type="hidden" value="" id="rule_type" />
                 <input type="text" class="ui_textbox ui_textbox_longer padded" value="" id="rule_pattern" />
-            </span>
-            <span class="padded float_right">
-                <span id="rule_delete" class="buttonize button_neutral padded hidden"></span>
-                <span id="rule_save" class="buttonize button_neutral padded"></span>
-                <span id="rule_cancel" class="buttonize button_neutral padded"></span>
-            </span>
+            </div>
+            <div class="float_right">
+                <div id="rule_delete" class="button"></div>
+                <div id="rule_save" class="button"></div>
+                <div id="rule_cancel" class="button"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -66,13 +79,13 @@
     </div>
     <div id="center">
         <div id="header" class="table">
-            <label><span id="ext_name"></span> <span id="ext_version" class="emphasis"></span></label>
-            <span class="float_right">
-                <span id="ext_import_options" class="buttonize button_neutral padded"></span>
-                <span id="ext_export_options" class="buttonize button_neutral padded"></span>
-                <span id="ext_restore_defaults" class="buttonize button_neutral padded"></span>
-                <span id="ext_save_options" class="buttonize button_neutral padded"></span>
-            </span>
+            <div><span id="ext_name"></span> <span id="ext_version" class="emphasis"></span></div>
+            <div class="float_right">
+                <div id="ext_import_options" class="button"></div>
+                <div id="ext_export_options" class="button"></div>
+                <div id="ext_restore_defaults" class="button"></div>
+                <div id="ext_save_options" class="button"></div>
+            </div>
         </div>
 
         <div class="padded warning">
@@ -80,18 +93,18 @@
         </div>
 
         <div id="main">
-            <div id="enforce" class="buttonize padded folder enforce table">URLs to enforce</div>
+            <div id="enforce" class="buttonize padded folder enforce table">URLs to Enforce</div>
             <div id="folder_enforce" class="table visible">
                 <div class="padded margined">
-                    <span id="rule_add_enforce" class="buttonize button_neutral padded float_right">Add Rule</span>
-                    <span id="rule_sync_enforce" class="buttonize button_neutral padded float_right">Sync with Default Ruleset</span>
+                    <div id="rule_add_enforce" class="button float_right">Add Rule</div>
+                    <div id="rule_sync_enforce" class="button float_right">Sync with Default Ruleset</div>
                 </div>
             </div>
             <div id="exclude" class="buttonize padded folder exclude table">Exclusions</div>
             <div id="folder_exclude" class="table hidden">
                 <div class="padded margined">
-                    <span id="rule_add_exclude" class="buttonize button_neutral padded float_right">Add Rule</span>
-                    <span id="rule_sync_exclude" class="buttonize button_neutral padded float_right">Sync with Default Ruleset</span>
+                    <div id="rule_add_exclude" class="button float_right">Add Rule</div>
+                    <div id="rule_sync_exclude" class="button float_right">Sync with Default Ruleset</div>
                 </div>
             </div>
 

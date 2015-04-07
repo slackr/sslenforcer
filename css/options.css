@@ -1,12 +1,11 @@
 .ui_textbox {
     border: 0px;
-    font-weight: bold;
     background-color: #3e3e3e;
     color: #ffffff;
-    vertical-align: middle;
+    font-size: 20px;
 }
 .ui_textbox_longer {
-    width: 400px;
+    width: 100%;
 }
 
 .ui_value {
@@ -54,4 +53,3 @@
 .highlight:hover {
     background-color: #141414;
 }
-
