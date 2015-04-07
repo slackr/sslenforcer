@@ -1,0 +1,45 @@
+/**
+ * SSLE
+ *
+ * @author  Adrian@Slacknet
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt GPLv3
+ */
+
+body {
+    background-color: #2C2C2C;
+    color: rgb(255, 255, 255);
+}
+
+#popup_wrapper {
+    background-color: #2C2C2C;
+    color: rgb(255, 255, 255);
+    font-size: 40px;
+}
+
+#popup {
+    background: rgba(0, 0, 0, 0.5);
+    color: rgb(255, 255, 255);
+}
+
+.clicked
+,.button:hover
+,#popup_yes:hover
+,#popup_no:hover
+{
+    background-color: rgba(194, 194, 194, 0.45)
+}
+
+#progress_bar {
+    -moz-appearance: progressbar;
+    background-color: rgb(255, 255, 255);
+}
+#progress_bar[value]::-webkit-progress-bar {
+    background-color: rgb(255, 255, 255);
+}
+
+#progress_bar[value]::-moz-progress-bar {
+    background-color:  rgb(66, 133, 244);
+}
+#progress_bar[value]::-webkit-progress-value {
+    background-color:  rgb(66, 133, 244);
+}

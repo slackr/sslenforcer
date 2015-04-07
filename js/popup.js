@@ -28,7 +28,7 @@ function initialize_page() {
     $('#ext_options')
         .text("Options")
         .on("click", function() {
-            chrome.tabs.create({'url': chrome.extension.getURL('html/options.html')});
+            chrome.tabs.create({'url': chrome.extension.getURL('view/options.html')});
         });
 
     document.title = ext_name + " (" + ext_version + ") Popup";

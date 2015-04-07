@@ -1,0 +1,58 @@
+body {
+    font-size: 15px;
+    height: 100%;
+}
+input:focus {
+    outline: none;
+}
+
+#popup_wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 500px;
+    padding: 10px;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+#popup {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    z-index: 201;
+    display: none;
+}
+#popup_title {
+    font-size: 25px;
+    padding: 10px;
+    text-align: left;
+    font-weight: bold;
+}
+#popup_message {
+    font-size: 15px;
+    text-align: left;
+    padding: 10px;
+}
+#popup_yes, #popup_no {
+    float: right;
+}
+#progress_bar {
+    position: absolute;
+    display: none;
+    height: 5px;
+    width: 100%;
+    bottom: 50px;
+    border: 0px;
+    z-index:  500;
+}
+
+.button {
+    display: inline-block;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 15px;
+}
+.hidden {
+    display: none;
+}
