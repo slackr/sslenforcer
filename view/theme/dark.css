@@ -8,6 +8,7 @@
 body {
     background-color: #2C2C2C;
     color: rgb(255, 255, 255);
+    font-family: 'Segoe UI', wf_SegoeUI, Tahoma, Verdana, Arial, Helvetica, sans-serif;
 }
 
 input {
@@ -24,7 +25,7 @@ input {
 }
 .ui_value_error {
     color: #ffffff;
-    background-color: #ff2f2f;
+    background-color: rgb(255, 47, 47);
 }
 
 .popup_wrapper {
@@ -61,7 +62,6 @@ input {
 .warning {
     color: #ff2f2f;
     background-color: #141414;
-    text-align: left;
 }
 .message {
     color: #ffffff;
@@ -81,7 +81,7 @@ input {
 }
 
 .button_off {
-    background-color: #ff2f2f;
+    background-color: rgb(255, 47, 47);
 }
 .button_on {
     background-color: #0ff921;
