@@ -5,11 +5,13 @@
     <title></title>
     <link rel="stylesheet" href="../css/common.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="../css/popup.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="../view/ui.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="../view/theme/dark.css" type="text/css" media="screen" />
     <script type="text/javascript" src="../lib/config.js"></script>
     <script type="text/javascript" src="../lib/object.js"></script>
     <script type="text/javascript" src="../lib/ext/jquery.js"></script>
     <script type="text/javascript" src="../controller/ui.js"></script>
-    <script type="text/javascript" src="../js/popup.js"></script>
+    <script type="text/javascript" src="../controller/popup.js"></script>
 </head>
 <body>
 <div id="container">
@@ -17,9 +19,13 @@
     <div id="right"></div>
     <div id="center">
         <div id="header">
-            <span id="ext_name"></span> <span id="ext_version" class="emphasis"></span>
-            <span id="ext_state" class="buttonize padded"></span>
-            <span id="ext_options" class="buttonize button_neutral padded"></span>
+            <div>
+                <span id="ext_name"></span> <span id="ext_version" class="emphasis"></span>
+                <div class="button_container">
+                    <div id="ext_options" class="button"></div>
+                    <div id="ext_state" class="button"></div>
+                </div>
+            </div>
         </div>
         <div id="main"></div>
     </div>

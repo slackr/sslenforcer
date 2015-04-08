@@ -22,18 +22,9 @@
     padding-bottom: 20px;
 }
 
-body {
-    font-family: 'Segoe UI', wf_SegoeUI, Tahoma, Verdana, Arial, Helvetica, sans-serif;
-    font-size: small;
-    padding: 3px;
-    background-color: #2c2c2c;
-    color: #ffffff;
-}
-
 .emphasis {
     font-weight: bold;
     color: #888888;
-    font-size: small;
 }
 
 .buttonize {
@@ -41,23 +32,14 @@ body {
     -webkit-user-select: none;
 }
 .button_off {
-    text-align: center;
-    vertical-align: middle;
     background-color: #ff2f2f;
-    margin: 0px 2px 0px 2px;
 }
 .button_on {
-    text-align: center;
-    vertical-align: middle;
     background-color: #0ff921;
     color: #2c2c2c;
-    margin: 0px 2px 0px 2px;
 }
 .button_neutral {
-    text-align: center;
-    vertical-align: middle;
     background-color: #4d4d4d;
-    margin: 0px 2px 0px 2px;
 }
 
 .button_neutral:hover {
@@ -104,9 +86,6 @@ div.table label {
     display: block;
     float: left;
     text-align: left;
-}
-div.table .float_right {
-    float: right;
 }
 
 

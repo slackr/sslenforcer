@@ -1,7 +1,12 @@
 body {
     font-size: 15px;
     height: 100%;
+    background-color: #2c2c2c;
+    font-family: 'Segoe UI', wf_SegoeUI, Tahoma, Verdana, Arial, Helvetica, sans-serif;
+    color: #ffffff;
+    padding: 10px;
 }
+
 input:focus {
     outline: none;
 }
@@ -53,6 +58,10 @@ input:focus {
     cursor: pointer;
     font-size: 15px;
 }
+.button_container {
+    float: right;
+}
+
 .hidden {
     display: none;
 }

@@ -9,9 +9,9 @@
     <link rel="stylesheet" href="../view/theme/dark.css" type="text/css" media="screen" />
     <script type="text/javascript" src="../lib/config.js"></script>
     <script type="text/javascript" src="../lib/object.js"></script>
-    <script type="text/javascript" src="../controller/ui.js"></script>
     <script type="text/javascript" src="../lib/ext/jquery.js"></script>
-    <script type="text/javascript" src="../js/options.js"></script>
+    <script type="text/javascript" src="../controller/ui.js"></script>
+    <script type="text/javascript" src="../controller/options.js"></script>
 </head>
 <body>
 <div id="popup">
@@ -34,7 +34,7 @@
             <div class="padded">
                 <input type="file" class="ui_textbox ui_textbox_longer padded" value="" id="import_options_file" />
             </div>
-            <div class="float_right">
+            <div class="button_container">
                 <span id="import_options" class="button"></span>
                 <span id="import_cancel" class="button"></span>
             </div>
@@ -64,7 +64,7 @@
                 <input type="hidden" value="" id="rule_type" />
                 <input type="text" class="ui_textbox ui_textbox_longer padded" value="" id="rule_pattern" />
             </div>
-            <div class="float_right">
+            <div class="button_container">
                 <div id="rule_delete" class="button"></div>
                 <div id="rule_save" class="button"></div>
                 <div id="rule_cancel" class="button"></div>
@@ -79,12 +79,14 @@
     </div>
     <div id="center">
         <div id="header" class="table">
-            <div><span id="ext_name"></span> <span id="ext_version" class="emphasis"></span></div>
-            <div class="float_right">
-                <div id="ext_import_options" class="button"></div>
-                <div id="ext_export_options" class="button"></div>
-                <div id="ext_restore_defaults" class="button"></div>
-                <div id="ext_save_options" class="button"></div>
+            <div>
+                <span id="ext_name"></span> <span id="ext_version" class="emphasis"></span>
+                <div class="button_container">
+                    <div id="ext_import_options" class="button"></div>
+                    <div id="ext_export_options" class="button"></div>
+                    <div id="ext_restore_defaults" class="button"></div>
+                    <div id="ext_save_options" class="button"></div>
+                </div>
             </div>
         </div>
 
@@ -95,16 +97,16 @@
         <div id="main">
             <div id="enforce" class="buttonize padded folder enforce table">URLs to Enforce</div>
             <div id="folder_enforce" class="table visible">
-                <div class="padded margined">
-                    <div id="rule_add_enforce" class="button float_right">Add Rule</div>
-                    <div id="rule_sync_enforce" class="button float_right">Sync with Default Ruleset</div>
+                <div class="button_container">
+                    <div id="rule_add_enforce" class="button">Add Rule</div>
+                    <div id="rule_sync_enforce" class="button">Sync with Default Ruleset</div>
                 </div>
             </div>
             <div id="exclude" class="buttonize padded folder exclude table">Exclusions</div>
             <div id="folder_exclude" class="table hidden">
-                <div class="padded margined">
-                    <div id="rule_add_exclude" class="button float_right">Add Rule</div>
-                    <div id="rule_sync_exclude" class="button float_right">Sync with Default Ruleset</div>
+                <div class="button_container">
+                    <div id="rule_add_exclude" class="button">Add Rule</div>
+                    <div id="rule_sync_exclude" class="button">Sync with Default Ruleset</div>
                 </div>
             </div>
 
@@ -112,35 +114,35 @@
             <div id="folder_advanced_options" class="hidden">
                 <div class="table margined">
                     <label>Maximum URLs to track in Popup</label>
-                    <span class="float_right">
+                    <div class="button_container">
                         <span id="option_value_max_tab_status" class="emphasis ui_value"></span>
-                    </span>
+                    </div>
                 </div>
                 <div class="table margined">
                     <label>Console logging level</label>
-                    <span class="float_right">
+                    <div class="button_container">
                         <span id="option_value_log_level" class="emphasis ui_value"></span>
-                    </span>
+                    </div>
                 </div>
                 <div class="table margined">
                     <label>Enforcement flood protection</label>
-                    <span class="float_right">
+                    <div class="button_container">
                         <span id="option_value_flood_hits" class="emphasis ui_value"></span> requests
                         in
                         <span id="option_value_flood_ms" class="emphasis ui_value"></span> miliseconds
-                    </span>
+                    </div>
                 </div>
                 <div class="table margined">
                     <label>Regex Flags</label>
-                    <span class="float_right">
+                    <div class="button_container">
                         <span id="option_regex_flags_i" class="hidden"></span><span id="option_regex_flags_g" class="hidden"></span>
-                    </span>
+                    </div>
                 </div>
                 <div class="table margined">
                     <label>Verbose tab status</label>
-                    <span class="float_right">
+                    <div class="button_container">
                         <span id="option_verbose_tab" class="hidden"></span>
-                    </span>
+                    </div>
                 </div>
             </div>
         </div>
