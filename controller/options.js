@@ -35,7 +35,6 @@ function populate_options() {
     });
 
     $('#ext_save_options')
-        .text('Save Options')
         .on("click", function() {
             $(this)
                 .addClass('message')
@@ -50,7 +49,6 @@ function populate_options() {
         });
 
     $('#ext_restore_defaults')
-        .text('Restore Defaults')
         .on("click", function() {
             var self = this;
             $ui.popup('Defaults', 'Are you sure you want to revert to default options? All rules will be reset as well!', 'RESTORE', 'CANCEL', function() {
@@ -66,14 +64,12 @@ function populate_options() {
         });
 
     $('#ext_export_options')
-        .text('Export Options')
         .on("click", function() {
             export_options();
         });
     $('#ext_import_options')
-        .text('Import Options')
         .on("click", function() {
-            show_popup('#popup_import_options');
+            $ui.popup(null, null, null, null, null, null, '#popup_import_options');
         });
 
     $('#rule_add_enforce, #rule_add_exclude')
@@ -84,7 +80,7 @@ function populate_options() {
             $('#rule_type').val(rule_type);
 
             $('#rule_delete').addClass('hidden');
-            show_popup('#popup_rule');
+            $ui.popup(null, null, null, null, null, null, '#popup_rule');
             $('#rule_pattern').focus();
         });
 
@@ -107,19 +103,17 @@ function populate_options() {
         });
 
     $('#rule_delete')
-        .text('Delete Rule')
         .on("click", function() {
 
             $ui.popup('Delete Rule', 'Are you sure you want to delete this rule?', 'DELETE', 'CANCEL', function(){
                 var rule_id = $('#rule_id').val();
                 delete_rule_entry(rule_id);
-                hide_popup('#popup_rule');
+                $ui.popup_close('#popup_rule');
                 $ui.popup_close();
             });
         });
 
     $('#rule_save')
-        .text('Save Rule')
         .on("click", function() {
 
             var save_type = $('#rule_type').val();
@@ -127,9 +121,10 @@ function populate_options() {
 
             if (typeof save_pattern == 'undefined'
                 || save_pattern === '') {
-                $ui.popup('Error', 'Invalid regex pattern (cannot be blank)', 'RETRY', function() {
+                $ui.popup('Error', 'Invalid regex pattern (cannot be blank)', 'RETRY', null, function() {
                     $('#rule_pattern').addClass("ui_value_error").focus();
                     setTimeout(function() { $('#rule_pattern').removeClass('ui_value_error'); }, 700);
+                    $ui.popup_close();
                 });
                 return false;
             }
@@ -138,9 +133,10 @@ function populate_options() {
             var old_id = save_id; // on save we generate a new id, and we need this to remove old element
             if (save_id === '') {
                 if (typeof $options.options.ssle[save_type][save_pattern] != 'undefined') {
-                    $ui.popup('Error', "A rule for '" + save_pattern + "' already exists in the '" + save_type + "' ruleset.", 'RETRY', function() {
+                    $ui.popup('Error', "A rule for '" + save_pattern + "' already exists in the '" + save_type + "' ruleset.", 'RETRY', null, function() {
                         $('#rule_pattern').addClass("ui_value_error").focus();
                         setTimeout(function() { $('#rule_pattern').removeClass('ui_value_error'); }, 700);
+                        $ui.popup_close();
                     });
                     return false;
                 }
@@ -180,7 +176,7 @@ function populate_options() {
                             $('#' + save_id).fadeIn('fast');
                         }, 700);
 
-                        hide_popup('#popup_rule');
+                        $ui.popup_close('#popup_rule');
 
                         $('#rule_save')
                             .removeClass("message")
@@ -193,20 +189,17 @@ function populate_options() {
         });
 
     $('#import_options')
-        .text('Import Options')
         .on("click", function() {
             import_options();
         });
 
     $('#rule_cancel')
-        .text('Cancel')
         .on("click", function() {
-            hide_popup('#popup_rule');
+            $ui.popup_close('#popup_rule');
         });
     $('#import_cancel')
-        .text('Cancel')
         .on("click", function() {
-            hide_popup('#popup_import_options');
+            $ui.popup_close('#popup_import_options');
         });
 
     $('#option_value_flood_hits').text($options.options.flood.hits);
@@ -283,14 +276,9 @@ function create_rule_record(div_id, rule, ruleobj) {
             .attr('id',ruleobj.id)
 
             .append(
-                $('<label>')
+                $('<span>')
                     .addClass('padded')
-                    .addClass('buttonize')
-                    .append(
-                        $('<span>')
-                            .addClass('padded')
-                            .text(rule)
-                    )
+                    .text(rule)
             )
             .on('click', function() {
                 edit_rule_entry($(this).attr('id'));
@@ -406,7 +394,7 @@ function edit_rule_entry(edit_id) {
         $('#rule_title').text('Edit ' + (record.type == "exclude" ? "Exclusion" : "Enforcement") + ' Rule');
 
         $('#rule_delete').removeClass('hidden');
-        show_popup('#popup_rule');
+        $ui.popup(null, null, null, null, null, null, '#popup_rule');
         $('#rule_pattern').focus();
     } else {
         $ui.popup('Error', 'Rule with id' + edit_id + ' not found');

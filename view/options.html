@@ -3,8 +3,6 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html, charset=UTF-8" />
     <title></title>
-    <link rel="stylesheet" href="../css/common.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="../css/options.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="../view/ui.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="../view/theme/dark.css" type="text/css" media="screen" />
     <script type="text/javascript" src="../lib/config.js"></script>
@@ -14,61 +12,63 @@
     <script type="text/javascript" src="../controller/options.js"></script>
 </head>
 <body>
-<div id="popup">
-    <div id="popup_wrapper">
-        <div id="popup_title"></div>
-        <div id="popup_message"></div>
-        <div id="popup_input">
+<div id="popup" class="popup_window">
+    <div id="popup_wrapper" class="popup_wrapper">
+        <div id="popup_title" class="popup_title"></div>
+        <div id="popup_message" class="popup_message"></div>
+        <div id="popup_input" class="popup_input">
             <div id="popup_yes" class="button"></div>
             <div id="popup_no" class="button"></div>
         </div>
     </div>
 </div>
-<div id="popup_import_options" class="popup_wrapper hidden">
-    <div id="popup_import_options_message" class="popup_message padded">
-        <div class="padded margined" id="import_title"></div>
-        <div class="padded margined warning">
-            Select a settings file to import (JSON format)
+<div id="popup_import_options" class="popup_window">
+    <div id="popup_import_options_wrapper" class="popup_wrapper">
+        <div id="popup_import_options_title" class="popup_title">Import Settings</div>
+        <div id="popup_import_options_message" class="popup_message">
+            <div>Select a settings file to import (JSON format):</div>
+            <br />
+            <div class="ui_textbox">
+                <input type="file" value="" id="import_options_file" />
+            </div>
         </div>
-        <div class="table padded info" id="import_area">
-            <div class="padded">
-                <input type="file" class="ui_textbox ui_textbox_longer padded" value="" id="import_options_file" />
-            </div>
-            <div class="button_container">
-                <span id="import_options" class="button"></span>
-                <span id="import_cancel" class="button"></span>
-            </div>
+        <div id="popup_import_options_input"" class="popup_input">
+            <div id="import_cancel" class="button">Cancel</div>
+            <div id="import_options" class="button">Import Options</div>
         </div>
     </div>
 </div>
-<div id="popup_rule" class="popup_wrapper hidden">
-    <div id="popup_rule_message" class="popup_message padded">
-        <div class="padded margined" id="rule_title"></div>
-        <div class="padded margined warning">
-            SSLE uses regular expressions for rules.
-            <br />
-            Rules should not include the protocol (http://, https://) but may include the URI.
-            <br />
-            The anchors (^, $) are not implicit, use them as required.
-        </div>
-        <div class="table padded info" id="rule_area">
-            <div class="padded">
+<div id="popup_rule" class="popup_window">
+    <div id="popup_rule_wrapper" class="popup_wrapper">
+        <div id="popup_rule_title" class="popup_title">Ruleset</div>
+        <div id="popup_rule_message" class="popup_message">
+            <div class="padded warning">
+                SSLE uses regular expressions for rules.
+                <br />
+                Rules should not include the protocol (http://, https://) but may include the URI.
+                <br />
+                The anchors (^, $) are not implicit, use them as required.
+            </div>
+            <div id="rule_area">
+                <br />
                 Match all subdomains and URIs: <span class="regex">^.*\.wikipedia\.org</span>
                 <br />
                 Match the fqdn its root URI only: <span class="regex">^www\.google\.com/$</span>
                 <br />
                 Match a specific URL: <span class="regex">^www\.rogers\.com/web/Rogers\.portal$</span>
-            </div>
-            <div class="padded">
+                <br />
+                <br />
                 <input type="hidden" value="" id="rule_id" />
                 <input type="hidden" value="" id="rule_type" />
-                <input type="text" class="ui_textbox ui_textbox_longer padded" value="" id="rule_pattern" />
+                <div class="ui_textbox">
+                    <input type="text" value="" id="rule_pattern" />
+                </div>
             </div>
-            <div class="button_container">
-                <div id="rule_delete" class="button"></div>
-                <div id="rule_save" class="button"></div>
-                <div id="rule_cancel" class="button"></div>
-            </div>
+        </div>
+        <div id="popup_rule_input" class="popup_input">
+            <div id="rule_delete" class="button">Delete Rule</div>
+            <div id="rule_save" class="button">Save Rule</div>
+            <div id="rule_cancel" class="button">Cancel</div>
         </div>
     </div>
 </div>
@@ -82,10 +82,10 @@
             <div>
                 <span id="ext_name"></span> <span id="ext_version" class="emphasis"></span>
                 <div class="button_container">
-                    <div id="ext_import_options" class="button"></div>
-                    <div id="ext_export_options" class="button"></div>
-                    <div id="ext_restore_defaults" class="button"></div>
-                    <div id="ext_save_options" class="button"></div>
+                    <div id="ext_import_options" class="button">Import Options</div>
+                    <div id="ext_export_options" class="button">Export Options</div>
+                    <div id="ext_restore_defaults" class="button">Restore Defaults</div>
+                    <div id="ext_save_options" class="button">Save Options</div>
                 </div>
             </div>
         </div>
@@ -95,53 +95,53 @@
         </div>
 
         <div id="main">
-            <div id="enforce" class="buttonize padded folder enforce table">URLs to Enforce</div>
+            <div id="enforce" class="buttonize padded folder state_enforced table">URLs to Enforce</div>
             <div id="folder_enforce" class="table visible">
                 <div class="button_container">
-                    <div id="rule_add_enforce" class="button">Add Rule</div>
                     <div id="rule_sync_enforce" class="button">Sync with Default Ruleset</div>
+                    <div id="rule_add_enforce" class="button">Add Rule</div>
                 </div>
             </div>
-            <div id="exclude" class="buttonize padded folder exclude table">Exclusions</div>
+            <div id="exclude" class="buttonize padded folder state_error table">Exclusions</div>
             <div id="folder_exclude" class="table hidden">
                 <div class="button_container">
-                    <div id="rule_add_exclude" class="button">Add Rule</div>
                     <div id="rule_sync_exclude" class="button">Sync with Default Ruleset</div>
+                    <div id="rule_add_exclude" class="button">Add Rule</div>
                 </div>
             </div>
 
-            <div id="advanced_options" class="buttonize padded folder">Advanced Options</div>
+            <div id="advanced_options" class="buttonize padded folder state_warning table">Advanced Options</div>
             <div id="folder_advanced_options" class="hidden">
-                <div class="table margined">
-                    <label>Maximum URLs to track in Popup</label>
+                <div class="padded">
+                    <span>Maximum URLs to track in Popup</span>
                     <div class="button_container">
                         <span id="option_value_max_tab_status" class="emphasis ui_value"></span>
                     </div>
                 </div>
-                <div class="table margined">
-                    <label>Console logging level</label>
+                <div class="padded">
+                    <span>Console logging level</span>
                     <div class="button_container">
                         <span id="option_value_log_level" class="emphasis ui_value"></span>
                     </div>
                 </div>
-                <div class="table margined">
-                    <label>Enforcement flood protection</label>
+                <div class="padded">
+                    <span>Enforcement flood protection</span>
                     <div class="button_container">
                         <span id="option_value_flood_hits" class="emphasis ui_value"></span> requests
                         in
                         <span id="option_value_flood_ms" class="emphasis ui_value"></span> miliseconds
                     </div>
                 </div>
-                <div class="table margined">
-                    <label>Regex Flags</label>
+                <div class="padded">
+                    <span>Regex Flags</span>
                     <div class="button_container">
-                        <span id="option_regex_flags_i" class="hidden"></span><span id="option_regex_flags_g" class="hidden"></span>
+                        <span id="option_regex_flags_i"></span><span id="option_regex_flags_g"></span>
                     </div>
                 </div>
-                <div class="table margined">
-                    <label>Verbose tab status</label>
+                <div class="padded">
+                    <span>Verbose tab status</span>
                     <div class="button_container">
-                        <span id="option_verbose_tab" class="hidden"></span>
+                        <span id="option_verbose_tab"></span>
                     </div>
                 </div>
             </div>

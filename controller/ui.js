@@ -57,10 +57,17 @@ SknUi.prototype.scroll_down = function() {
  * @param   {string} no_text      (optional) Text to display in NO button
  * @param   {function} yes_callback (optional) Function to call after YES onclick
  * @param   {function} no_callback  (optional) Function to call after NO onclick
+ * @param   {string} prebuilt_popup_id  (optional) Show a prebuilt popup and exit
  *
  * @returns {null}
  */
-SknUi.prototype.popup = function(title, message, yes_text, no_text, yes_callback, no_callback) {
+SknUi.prototype.popup = function(title, message, yes_text, no_text, yes_callback, no_callback, prebuilt_popup_id) {
+    if (typeof prebuilt_popup_id == 'string') {
+        $(prebuilt_popup_id).show();
+        this.popup_center(prebuilt_popup_id);
+        return;
+    }
+
     var self = this;
 
     this.ui.popup.no.off('click');
@@ -111,8 +118,10 @@ SknUi.prototype.popup = function(title, message, yes_text, no_text, yes_callback
  *
  * @returns {null}
  */
-SknUi.prototype.popup_close = function() {
-    this.ui.popup.window.hide();
+SknUi.prototype.popup_close = function(id) {
+    var p = typeof id == 'string' ? $(id) : this.ui.popup.window;
+
+    p.hide();
 };
 
 /**
@@ -120,10 +129,12 @@ SknUi.prototype.popup_close = function() {
  *
  * @returns {null}
  */
-SknUi.prototype.popup_center = function() {
+SknUi.prototype.popup_center = function(id) {
+    var p = typeof id == 'string' ? $(id).find('div:first') : this.ui.popup.wrapper;
+
     // center div
-    this.ui.popup.wrapper.css('margin-top', -this.ui.popup.wrapper.outerHeight()/2 + 'px');
-    this.ui.popup.wrapper.css('margin-left', -this.ui.popup.wrapper.outerWidth()/2 + 'px');
+    p.css('margin-top', -p.outerHeight()/2 + 'px');
+    p.css('margin-left', -p.outerWidth()/2 + 'px');
 };
 
 /**
@@ -175,7 +186,7 @@ SknUi.prototype.draw_state = function(state, state_data) {
         this.log(state + " state url count: " + urls.length, 1, 'state');
         for (var u = 0; u < urls.length; u++) {
             var fullurl = urls[u].url;
-            var url = this.limit(fullurl, 75);
+            var url = this.limit(fullurl, 50);
             var fulluri = this.url_parse(urls[u].url, "uri");
             var matched_pattern = typeof urls[u].pattern != "undefined" ? "Rule: " + urls[u].pattern : '';
 

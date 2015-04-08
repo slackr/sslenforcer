@@ -10,21 +10,35 @@ body {
     color: rgb(255, 255, 255);
 }
 
-#popup_wrapper {
-    background-color: #2C2C2C;
-    color: rgb(255, 255, 255);
-    font-size: 40px;
+input {
+    background: transparent;
+    color: #ffffff;
 }
 
-#popup {
+.ui_textbox {
+    background: rgba(0, 0, 0, 0.5);
+    color: rgb(255, 255, 255);
+}
+.ui_value {
+    color: #4a9cff;
+}
+.ui_value_error {
+    color: #ffffff;
+    background-color: #ff2f2f;
+}
+
+.popup_wrapper {
+    background-color: #2C2C2C;
+    color: rgb(255, 255, 255);
+}
+
+.popup_window {
     background: rgba(0, 0, 0, 0.5);
     color: rgb(255, 255, 255);
 }
 
 .clicked
 ,.button:hover
-,#popup_yes:hover
-,#popup_no:hover
 {
     background-color: rgba(194, 194, 194, 0.45)
 }
@@ -42,4 +56,80 @@ body {
 }
 #progress_bar[value]::-webkit-progress-value {
     background-color:  rgb(66, 133, 244);
+}
+
+.warning {
+    color: #ff2f2f;
+    background-color: #141414;
+    text-align: left;
+}
+.message {
+    color: #ffffff;
+    background-color: #4a9cff;
+}
+.info {
+    color: #ffffff;
+    background-color: #000000;
+}
+
+.domain:hover {
+    background-color: none;
+}
+
+.highlight:hover {
+    background-color: #141414;
+}
+
+.button_off {
+    background-color: #ff2f2f;
+}
+.button_on {
+    background-color: #0ff921;
+    color: #2c2c2c;
+}
+.button_neutral {
+    background-color: #4d4d4d;
+}
+
+.button_neutral:hover {
+    background-color: #4a9cff;
+}
+
+.folder {
+    background-color: #4d4d4d;
+    color: #ffffff;
+}
+
+.state_enforced {
+}
+.state_disabled {
+}
+.state_warning {
+}
+.state_error {
+}
+
+.state_warning:hover {
+    background-color: #fb9c33;
+    color: #2c2c2c;
+}
+.state_error:hover {
+    background-color: #ff2f2f;
+}
+.state_enforced:hover {
+    background-color: #0ff921;
+    color: #2c2c2c;
+}
+.state_disabled:hover {
+    background-color: #737373;
+}
+
+.uri {
+    color: #888888;
+}
+.fqdn {
+    color: #d6d6d6;
+}
+.domain:hover {
+    background-color: #4d4d4d;
 }

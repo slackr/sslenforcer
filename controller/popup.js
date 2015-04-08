@@ -26,7 +26,6 @@ function initialize_page() {
     $ui.ui.ext_popup.ext_state.on("click", toggle_ssle);
 
     $('#ext_options')
-        .text("Options")
         .on("click", function() {
             chrome.tabs.create({'url': chrome.extension.getURL('view/options.html')});
         });
