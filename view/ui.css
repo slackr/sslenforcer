@@ -166,9 +166,8 @@ div.table label {
     right: 0;
 }
 #center {
-    position: absolute;
     margin-left: 300px;
-    padding-right: 300px;
+    margin-right: 300px;
 }
 #header {
     padding-bottom: 20px;
