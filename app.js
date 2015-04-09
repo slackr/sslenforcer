@@ -59,9 +59,9 @@ chrome.webRequest.onCompleted.addListener(function(data) {
                 }
             }
 
-            if (Object.keys($tab_status[tid].enforced).length > 0
-                && Object.keys($tab_status[tid].disabled).length > 0
-                && Object.keys($tab_status[tid].error).length === 0) {
+            if (typeof $tab_status[tid]['enforced'] != 'undefined'
+                && typeof $tab_status[tid]['disabled'] != 'undefined'
+                && typeof $tab_status[tid]['error'] == 'undefined') {
 
                 current_state = "warning";
             }
@@ -261,7 +261,8 @@ function se(data) {
     }
 
     // if the tab navigates to a new main url, clear the tab status
-    if (type == "main_frame" && tab_has_status(tid)) {
+    if (type == "main_frame"
+        && tab_has_status(tid)) {
         $bg.log("nav to new main_frame, tab_status for tab " + tid + " reset", 0, "nav");
         uninit_tab(tid);
         init_tab(tid);
@@ -356,9 +357,13 @@ function flood_check(url, secure_url, tid) {
  * write url enforcement information to tab_status
  */
 function push_tab_status(state, tid, reason, data) {
-    if (tid == -1) {
+    if (tid === -1) {
         $bg.log("tab status tracking for tabid: -1 skipped", 0, "tabs");
         return;
+    }
+
+    if (typeof $tab_status[tid][state] == 'undefined') {
+        $tab_status[tid][state] = {};
     }
 
     if (typeof $tab_status[tid][state][reason] == 'undefined') {
@@ -369,11 +374,15 @@ function push_tab_status(state, tid, reason, data) {
         $bg.log("tab status count exceeded " + $options.max_tab_status + " for '" + tid + "', ssle will cease reporting on new urls but will continue to enforce", 1, "ssle");
     } else {
         $tab_status[tid][state][reason].push(data);
-        $bg.log("pushed status to tab "+ tid +"("+state+"): "+ JSON.stringify(data), 0, "tabs");
+        $bg.log("pushed status to tab " + tid + "(" + state + "): "+ JSON.stringify(data), 0, "tabs");
     }
 }
 
 function tab_reason_url_count(tid, state, reason) {
+    if (typeof $tab_status[tid] == 'undefined'
+        || typeof $tab_status[tid][state] == 'undefined') {
+        return 0;
+    }
     return Object.keys($tab_status[tid][state][reason]).length;
 }
 
@@ -381,12 +390,9 @@ function tab_reason_url_count(tid, state, reason) {
  * check if a tab has at least one status populated
  */
 function tab_has_status(tid) {
-    if (typeof $tab_status[tid] != 'undefined') {
-        for (var state in $bg.config.states) {
-            if (Object.keys($tab_status[tid][state]).length > 0) {
-                return true;
-            }
-        }
+    if (typeof $tab_status[tid] != 'undefined'
+        && Object.keys($tab_status[tid]) > 0) {
+        return true;
     }
     return false;
 }
@@ -395,21 +401,21 @@ function uninit_tab(tid) {
     delete $tab_status[tid];
     update_badge_text();
 
-    $bg.log("tab_status for "+ tid +" uninitialized", 0, "tabs");
+    $bg.log("tab_status for " + tid + " uninitialized", 0, "tabs");
 }
 
 function init_tab(tid) {
     // initialize tab_status
     $tab_status[tid] = {};
 
-    for (var state in $bg.config.states) {
-        $tab_status[tid][state] = {};
-    }
+    //for (var state in $bg.config.states) {
+    //    $tab_status[tid][state] = {};
+    //}
 
     update_badge_text();
     set_icon("disabled", tid);
 
-    $bg.log("tab_status for "+ tid +" initialized", 0, "tabs");
+    $bg.log("tab_status for " + tid + " initialized", 0, "tabs");
 }
 
 /**

@@ -57,7 +57,8 @@ function write_tab_status(ts) {
         var state = priority_states[s];
         var state_data = data[state];
 
-        if (Object.keys(state_data).length > 0) {
+        if (typeof state_data != 'undefined'
+            && Object.keys(state_data).length > 0) {
             $popup.log("writing tab status for state: " + state, 1, 'tab');
             $ui.draw_state(state, state_data);
         } else {
