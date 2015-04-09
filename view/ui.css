@@ -13,12 +13,11 @@ input {
     margin: 0;
     width: 100%;
     outline: none;
-    /*font-weight: bold;*/
     font-size: 15px;
 }
 
 #popup {
-    z-index: 998;
+    z-index: 1000;
 }
 #popup_import_options {
     z-index: 201;
@@ -98,14 +97,12 @@ input {
 }
 
 .ui_box {
-    width: 12px;
+    /*width: 12px;*/
     display: inline-block;
 }
 
-
 .emphasis {
     font-weight: bold;
-    color: #888888;
 }
 
 .padded {
