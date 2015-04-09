@@ -186,7 +186,7 @@ SknUi.prototype.draw_state = function(state, state_data) {
         this.log(state + " state url count: " + urls.length, 1, 'state');
         for (var u = 0; u < urls.length; u++) {
             var fullurl = urls[u].url;
-            var url = this.limit(fullurl, 50);
+            var url = this.limit(fullurl, 60);
             var fulluri = this.url_parse(urls[u].url, "uri");
             var matched_pattern = typeof urls[u].pattern != "undefined" ? "Rule: " + urls[u].pattern : '';
 

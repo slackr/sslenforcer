@@ -109,7 +109,7 @@ input {
 }
 
 .padded {
-    padding: 12px;
+    padding: 10px;
 }
 .margined {
     margin: 7px 12px 7px 12px;
@@ -117,22 +117,18 @@ input {
 
 .folder {
     margin: 10px 0px 10px 0px;
-    vertical-align: middle;
 }
 
 .uri {
     padding: 7px 7px 7px 12px;
-    overflow: auto;
-    vertical-align: middle;
+    overflow: hidden;
 }
 .fqdn {
     padding: 7px 7px 7px 25px;
-    vertical-align: middle;
 }
 .domain {
     font-weight: bold;
     padding: 7px 7px 7px 12px;
-    vertical-align: middle;
 }
 
 /**
@@ -145,6 +141,15 @@ div.table label {
     display: block;
     float: left;
     text-align: left;
+}
+
+.table_container {
+    position: relative;
+}
+.table_right {
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 .wide_container {

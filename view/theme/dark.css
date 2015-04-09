@@ -73,7 +73,7 @@ input {
 }
 
 .domain:hover {
-    background-color: none;
+    background: transparent;
 }
 
 .highlight:hover {
@@ -91,8 +91,10 @@ input {
     background-color: #4d4d4d;
 }
 
-.button_neutral:hover {
+.button_neutral:hover
+,.button_on:hover {
     background-color: #4a9cff;
+    color: #ffffff;
 }
 
 .folder {
@@ -131,5 +133,5 @@ input {
     color: #d6d6d6;
 }
 .domain:hover {
-    background-color: #4d4d4d;
+    background-color: #141414;
 }
