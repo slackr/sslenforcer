@@ -106,7 +106,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
             var pv = details.previousVersion;
 
             $bg.log("initializing extension... (previous version: " + pv + ")", 1, "update");
-            get_options(null, (version_compare('1.0.2', pv) >= 0 ? true : false));
+            upgrade_ssle(pv);
             break;
 
     }
@@ -252,7 +252,6 @@ function se(data) {
     var secure_url = "https://" + fqdn + uri;
 
     var enforcement = 0;
-    var status_msg = "";
 
     $bg.log("get " + type + " (by tab: " + tid + ") - fqdn: " + fqdn + ", uri: " + uri, 0, "nav");
 
@@ -271,51 +270,51 @@ function se(data) {
     for (var pattern_ex in $options.ssle.exclude) {
         var rtest_ex = new RegExp(pattern_ex, $options.regex_flags);
         if (rtest_ex.test(fqdn + uri)) {
-            status_msg = "exclusion rule matched for '" + fqdn + "' (" + pattern_ex + ")";
             push_tab_status("warning", tid, 0, {
                 url: fqdn + uri,
-                pattern: pattern_ex
+                //pattern: pattern_ex
             });
 
-            $bg.log(status_msg, 1, "enforce");
+            $bg.log("exclusion rule matched for '" + fqdn + "' (" + pattern_ex + ")", 1, "enforce");
+
+            rtest_ex = null;
             return { cancel: false };
         }
+        rtest_ex = null;
     }
     for (var pattern_en in $options.ssle.enforce) {
         var rtest_en = new RegExp(pattern_en, $options.regex_flags);
         if (rtest_en.test(fqdn + uri)) {
-            status_msg = "rule matched for '" + fqdn + "' (" + pattern_en + "), rewriting request to: " + secure_url;
             push_tab_status("enforced", tid, 1, {
                 url: fqdn + uri,
-                pattern: pattern_en
+                //pattern: pattern_en
             });
 
-            $bg.log(status_msg, 1, "enforce");
+            $bg.log("rule matched for '" + fqdn + "' (" + pattern_en + "), rewriting request to: " + secure_url, 1, "enforce");
+
+            rtest_en = null;
             return ($bg.is_https(url) ? { cancel: false } : flood_check(fqdn + uri, secure_url, tid));
         }
+        rtest_en = null;
     }
 
     if ($bg.is_https(url)) {
-        status_msg = "url '" + fqdn + uri + "' is already https, ignoring";
-
         if ($options.verbose_tab) {
             push_tab_status("enforced", tid, 0, {
                 url: fqdn + uri
             });
         }
 
-        $bg.log(status_msg, 1, "enforce");
+        $bg.log("url '" + fqdn + uri + "' is already https, ignoring", 0, "enforce");
         return { cancel: false };
     }
 
     // no rules matched, url is not https
-    status_msg = "no rules matched for url: " + fqdn + "/" + uri;
     push_tab_status("disabled", tid, 0, {
         url: fqdn + uri,
-        //msg: status_msg
     });
 
-    $bg.log(status_msg, 1, "enforce");
+    $bg.log("no rules matched for url: " + fqdn + "/" + uri, 1, "enforce");
     return { cancel: false };
 }
 
@@ -327,27 +326,24 @@ function se(data) {
  * @return { cancel: false }
  */
 function flood_check(url, secure_url, tid) {
-    var status_msg = "";
-
     if (typeof $flood[url] == 'undefined') {
         $bg.log("url not tracked, initializing: " + url, 0, "flood");
+
         $flood[url] = { hits: 1 };
         setTimeout(function() {
             if (typeof $flood[url] != 'undefined') {
                 $bg.log("tracking expired for: " + url, 0, "flood");
+
                 delete $flood[url];
             }
         }, $options.flood.ms);
 
     } else if ($flood[url].hits > $options.flood.hits) {
-        status_msg = "url is flooding, will not enforce SSL (" + $flood[url].hits + " hits in " + $options.flood.ms + "ms): " + url;
-
         push_tab_status("error", tid, 0, {
             url: url,
-            //msg: status_msg
         });
 
-        $bg.log(status_msg, 1, "flood");
+        $bg.log("url is flooding, will not enforce SSL (" + $flood[url].hits + " hits in " + $options.flood.ms + "ms): " + url, 1, "flood");
         return { cancel: false };
     } else {
         $flood[url].hits++;
@@ -360,6 +356,11 @@ function flood_check(url, secure_url, tid) {
  * write url enforcement information to tab_status
  */
 function push_tab_status(state, tid, reason, data) {
+    if (tid == -1) {
+        $bg.log("tab status tracking for tabid: -1 skipped", 0, "tabs");
+        return;
+    }
+
     if (typeof $tab_status[tid][state][reason] == 'undefined') {
         $tab_status[tid][state][reason] = [];
     }
@@ -380,16 +381,14 @@ function tab_reason_url_count(tid, state, reason) {
  * check if a tab has at least one status populated
  */
 function tab_has_status(tid) {
-    var has_status = false;
     if (typeof $tab_status[tid] != 'undefined') {
         for (var state in $bg.config.states) {
             if (Object.keys($tab_status[tid][state]).length > 0) {
-                has_status = true;
-                break;
+                return true;
             }
         }
     }
-    return has_status;
+    return false;
 }
 
 function uninit_tab(tid) {
@@ -570,4 +569,21 @@ function delete_record_by_id(id) {
             }
         }
     }
+}
+
+function upgrade_ssle(previous_version) {
+    $bg.log('upgrading ssle from ' + previous_version + '...', 1, 'upgrade');
+
+    var convert_legacy_ruleset = false;
+
+    if (version_compare('1.0.2', previous_version) >= 0) {
+        convert_legacy_ruleset = true;
+    }
+
+    get_options(function() {
+        if ($options.log_level < 0) {
+            $options.log_level = 0;
+            $bg.log('fixed log_level value (< 0)', 1, 'upgrade');
+        }
+    }, convert_legacy_ruleset);
 }
