@@ -17,14 +17,14 @@
      ],
 
     "icons": {
-        "16": "img/ssle16.png",
-        "48": "img/ssle48.png",
-        "128": "img/ssle128.png"
+        "16": "lib/assets/ssle16.png",
+        "48": "lib/assets/ssle48.png",
+        "128": "lib/assets/ssle128.png"
     },
 
     "browser_action": {
         "default_icon": {
-            "19": "img/disabled.png"
+            "19": "lib/assets/disabled.png"
         },
         "default_popup": "view/popup.html"
     },
